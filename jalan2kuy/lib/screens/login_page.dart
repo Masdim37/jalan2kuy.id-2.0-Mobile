@@ -1,8 +1,9 @@
 import 'dart:ui';
 import 'package:flutter/material.dart';
 
-// 1. Tambahkan import ini (sesuaikan path jika berbeda folder)
+// Tambahkan import halaman form login dan register kamu di sini
 import 'login_form_page.dart'; 
+import 'register_page.dart'; 
 
 class LoginPage extends StatelessWidget {
   const LoginPage({Key? key}) : super(key: key);
@@ -37,8 +38,6 @@ class LoginPage extends StatelessWidget {
                 shape: BoxShape.circle,
               ),
               child: const Center(
-                // Ganti dengan path logo putih jalan2kuy.id
-                // child: Image.asset('assets/images/logo_white.png', width: 150),
                 child: Text(
                   'jalan2kuy.id',
                   style: TextStyle(
@@ -111,7 +110,7 @@ class LoginPage extends StatelessWidget {
                       height: 52,
                       child: ElevatedButton(
                         onPressed: () {
-                          // 2. Aksi navigasi ke LoginFormPage
+                          // Aksi navigasi ke LoginFormPage
                           Navigator.push(
                             context,
                             MaterialPageRoute(
@@ -145,7 +144,13 @@ class LoginPage extends StatelessWidget {
                     padding: const EdgeInsets.only(bottom: 40.0),
                     child: TextButton(
                       onPressed: () {
-                        // Aksi navigasi ke daftar (Register)
+                        // 2. AKSI NAVIGASI KE HALAMAN REGISTER
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const RegisterPage(),
+                          ),
+                        );
                       },
                       child: const Text(
                         'Buat Akun?',
