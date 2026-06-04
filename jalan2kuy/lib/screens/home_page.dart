@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-// Import package bootstrap icons yang sudah diinstal
-import 'package:bootstrap_icons/bootstrap_icons.dart'; 
+import 'package:bootstrap_icons/bootstrap_icons.dart';
+import 'profile_page.dart'; // Import halaman Profile
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -62,19 +62,14 @@ class _HomePageState extends State<HomePage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Header Logo
+                        // Header Logo (MENGGUNAKAN LOGO JPG)
                         Row(
-                          children: const [
-                            // Menggunakan Bootstrap Icon untuk kompas/explore
-                            Icon(BootstrapIcons.compass, color: Colors.white, size: 24),
-                            SizedBox(width: 8),
-                            Text(
-                              'jalan2kuy.id',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
+                          children: [
+                            // Logo JPG
+                            Image.asset(
+                              'assets/images/logo.png', // Sesuaikan path logo Anda
+                              width: 100,
+                              height: 100,
                             ),
                           ],
                         ),
@@ -192,10 +187,41 @@ class _HomePageState extends State<HomePage> {
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            _buildNavItem(Icons.confirmation_num_outlined, 'Ticket', false),
-            _buildNavItem(Icons.home, 'Home', true), // Home diset Aktif (true)
-            _buildNavItem(Icons.search, 'Explore', false),
-            _buildNavItem(Icons.person_outline, 'Profile', false),
+            // --- Home (posisi paling kiri, aktif) ---
+            _buildNavItem(Icons.home, 'Home', true), 
+            
+            // --- Ticket ---
+            GestureDetector(
+              onTap: () {
+                // Nanti bisa ditambah navigasi ke halaman Ticket
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Halaman Ticket segera hadir!')),
+                );
+              },
+              child: _buildNavItem(Icons.confirmation_num_outlined, 'Ticket', false),
+            ),
+            
+            // --- Explore ---
+            GestureDetector(
+              onTap: () {
+                // Nanti bisa ditambah navigasi ke halaman Explore
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Halaman Explore segera hadir!')),
+                );
+              },
+              child: _buildNavItem(Icons.search, 'Explore', false),
+            ),
+            
+            // --- Profile (NAVIGASI KE PROFILE PAGE) ---
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const ProfilePage()),
+                );
+              },
+              child: _buildNavItem(Icons.person_outline, 'Profile', false),
+            ),
           ],
         ),
       ),
