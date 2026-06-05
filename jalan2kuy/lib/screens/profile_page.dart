@@ -3,6 +3,8 @@ import '../widgets/bottom_nav_bar.dart';
 import 'home_page.dart';
 import 'explore_page.dart';
 import 'edit_akun_page.dart';
+import 'login_page.dart';
+import 'welcome_page.dart';
 
 class ProfilePage extends StatelessWidget {
   const ProfilePage({Key? key}) : super(key: key);
@@ -232,7 +234,7 @@ class ProfilePage extends StatelessWidget {
     );
   }
 
-  // Dialog Logout
+  // Dialog Logout → mengarah ke LoginPage
   void _showLogoutDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -258,12 +260,18 @@ class ProfilePage extends StatelessWidget {
               const SizedBox(height: 24),
               Row(
                 children: [
-                  // Yes Button (Lime Green)
+                  // Yes Button (Lime Green) → ke LoginPage
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () {
-                        Navigator.pop(context); // Tutup dialog
-                        Navigator.pop(context); // Kembali ke HomePage
+                        // Hapus semua halaman di stack, lalu arahkan ke LoginPage
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const LoginPage(),
+                          ),
+                          (route) => false,
+                        );
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(content: Text('Berhasil logout')),
                         );
@@ -287,7 +295,7 @@ class ProfilePage extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  // NO Button (Merah)
+                  // NO Button (Merah) → tutup dialog
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () => Navigator.pop(context),
@@ -318,7 +326,7 @@ class ProfilePage extends StatelessWidget {
     );
   }
 
-  // Dialog Delete Account
+  // Dialog Delete Account → mengarah ke WelcomePage
   void _showDeleteAccountDialog(BuildContext context) {
     showDialog(
       context: context,
@@ -344,12 +352,18 @@ class ProfilePage extends StatelessWidget {
               const SizedBox(height: 24),
               Row(
                 children: [
-                  // Yes Button (Lime Green)
+                  // Yes Button (Lime Green) → ke WelcomePage
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () {
-                        Navigator.pop(context); // Tutup dialog
-                        Navigator.pop(context); // Kembali ke HomePage
+                        // Hapus semua halaman di stack, lalu arahkan ke WelcomePage
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const WelcomePage(),
+                          ),
+                          (route) => false,
+                        );
                         ScaffoldMessenger.of(context).showSnackBar(
                           const SnackBar(content: Text('Akun berhasil dihapus')),
                         );
@@ -373,7 +387,7 @@ class ProfilePage extends StatelessWidget {
                     ),
                   ),
                   const SizedBox(width: 12),
-                  // NO Button (Merah)
+                  // NO Button (Merah) → tutup dialog
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () => Navigator.pop(context),

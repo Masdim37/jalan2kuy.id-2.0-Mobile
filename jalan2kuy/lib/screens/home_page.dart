@@ -66,8 +66,17 @@ class _HomePageState extends State<HomePage> {
                           children: [
                             Image.asset(
                               'assets/images/logo.png',
-                              width: 100,
-                              height: 100,
+                              width: 40,
+                              height: 40,
+                            ),
+                            const SizedBox(width: 8),
+                            const Text(
+                              'jalan2kuy.id',
+                              style: TextStyle(
+                                color: Colors.white,
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ],
                         ),
@@ -122,82 +131,80 @@ class _HomePageState extends State<HomePage> {
                             ),
                           ),
                         ),
+                        
+                        const SizedBox(height: 16),
+                        
+                        // --- 2. Menu Kategori (Destinasi, Tiket, Event, Galeri) ---
+                        Container(
+                          padding: const EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(24),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withOpacity(0.08),
+                                blurRadius: 15,
+                                offset: const Offset(0, 5),
+                              ),
+                            ],
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              // DESTINASI - KLIK UNTUK KE EXPLORE PAGE
+                              _buildCategoryItem(
+                                BootstrapIcons.globe_americas, 
+                                'Destinasi', 
+                                Colors.blue,
+                                onTap: () {
+                                  Navigator.pushAndRemoveUntil(
+                                    context,
+                                    MaterialPageRoute(builder: (context) => const ExplorePage()),
+                                    (route) => false,
+                                  );
+                                },
+                              ),
+                              // TIKET - Belum ada halaman
+                              _buildCategoryItem(
+                                BootstrapIcons.ticket_perforated, 
+                                'Tiket', 
+                                Colors.orange,
+                                onTap: () {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('Halaman Tiket segera hadir!')),
+                                  );
+                                },
+                              ),
+                              // EVENT - Belum ada halaman
+                              _buildCategoryItem(
+                                BootstrapIcons.calendar_event, 
+                                'Event', 
+                                Colors.redAccent,
+                                onTap: () {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('Halaman Event segera hadir!')),
+                                  );
+                                },
+                              ),
+                              // GALERI - Belum ada halaman
+                              _buildCategoryItem(
+                                BootstrapIcons.images, 
+                                'Galeri', 
+                                Colors.blueAccent,
+                                onTap: () {
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(content: Text('Halaman Galeri segera hadir!')),
+                                  );
+                                },
+                              ),
+                            ],
+                          ),
+                        ),
                       ],
                     ),
                   ),
                 ),
               ],
-            ),
-
-            // --- 2. Bagian Bawah (Menu Kategori Kartu Putih) ---
-            Transform.translate(
-              offset: const Offset(0, -20), 
-              child: Container(
-                margin: const EdgeInsets.symmetric(horizontal: 20),
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(24),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.08),
-                      blurRadius: 15,
-                      offset: const Offset(0, 5),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    // DESTINASI - KLIK UNTUK KE EXPLORE PAGE
-                    _buildCategoryItem(
-                      BootstrapIcons.globe_americas, 
-                      'Destinasi', 
-                      Colors.blue,
-                      onTap: () {
-                        Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(builder: (context) => const ExplorePage()),
-                          (route) => false,
-                        );
-                      },
-                    ),
-                    // TIKET - Belum ada halaman
-                    _buildCategoryItem(
-                      BootstrapIcons.ticket_perforated, 
-                      'Tiket', 
-                      Colors.orange,
-                      onTap: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Halaman Tiket segera hadir!')),
-                        );
-                      },
-                    ),
-                    // EVENT - Belum ada halaman
-                    _buildCategoryItem(
-                      BootstrapIcons.calendar_event, 
-                      'Event', 
-                      Colors.redAccent,
-                      onTap: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Halaman Event segera hadir!')),
-                        );
-                      },
-                    ),
-                    // GALERI - Belum ada halaman
-                    _buildCategoryItem(
-                      BootstrapIcons.images, 
-                      'Galeri', 
-                      Colors.blueAccent,
-                      onTap: () {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Halaman Galeri segera hadir!')),
-                        );
-                      },
-                    ),
-                  ],
-                ),
-              ),
             ),
             
             const SizedBox(height: 80), 
