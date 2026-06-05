@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import '../widgets/bottom_nav_bar.dart';
+import 'home_page.dart';
+import 'explore_page.dart';
 import 'edit_akun_page.dart';
 
 class ProfilePage extends StatelessWidget {
@@ -178,66 +181,31 @@ class ProfilePage extends StatelessWidget {
         ],
       ),
 
-      // Bottom Navigation Bar
-      bottomNavigationBar: Container(
-        margin: const EdgeInsets.only(left: 24, right: 24, bottom: 24),
-        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(30),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 20,
-              offset: const Offset(0, 5),
-            ),
-          ],
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            // 1. HOME (PALING KIRI) - Saat ditekan kembali ke HomePage
-            _buildNavItem(
-              icon: Icons.home,
-              label: 'Home',
-              isActive: false,
-              onTap: () {
-                Navigator.pop(context); // Kembali ke HomePage
-              },
-            ),
-            // 2. Ticket
-            _buildNavItem(
-              icon: Icons.confirmation_num_outlined,
-              label: 'Ticket',
-              isActive: false,
-              onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Halaman Ticket segera hadir!')),
-                );
-              },
-            ),
-            // 3. Explore
-            _buildNavItem(
-              icon: Icons.search,
-              label: 'Explore',
-              isActive: false,
-              onTap: () {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Halaman Explore segera hadir!')),
-                );
-              },
-            ),
-            // 4. Profile - AKTIF (Hijau)
-            _buildNavItem(
-              icon: Icons.person_outline,
-              label: 'Profile',
-              isActive: true,
-              onTap: () {
-                // Tetap di halaman Profile
-              },
-            ),
-          ],
-        ),
+      // Bottom Navigation Bar (TERPISAH)
+      bottomNavigationBar: CustomBottomNavBar(
+        currentIndex: 3, // Profile aktif (index 3)
+        onTap: (index) {
+          if (index == 0) {
+            // Navigate ke Home
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => const HomePage()),
+              (route) => false,
+            );
+          } else if (index == 1) {
+            // Navigate ke Explore
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => const ExplorePage()),
+              (route) => false,
+            );
+          } else if (index == 2) {
+            // Ticket page belum ada
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Halaman Ticket segera hadir!')),
+            );
+          } else if (index == 3) return; // Sudah di Profile
+        },
       ),
     );
   }
@@ -260,39 +228,6 @@ class ProfilePage extends StatelessWidget {
           fontSize: 14,
           fontWeight: FontWeight.w500,
         ),
-      ),
-    );
-  }
-
-  // Widget untuk Bottom Navigation Item
-  Widget _buildNavItem({
-    required IconData icon,
-    required String label,
-    required bool isActive,
-    required VoidCallback onTap,
-  }) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            icon,
-            size: 32,
-            // Icon aktif = hijau, tidak aktif = hitam
-            color: isActive ? const Color(0xFF1B5E5E) : Colors.black87,
-          ),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 10,
-              fontWeight: FontWeight.bold,
-              // Teks aktif = hijau, tidak aktif = hitam
-              color: isActive ? const Color(0xFF1B5E5E) : Colors.black87,
-            ),
-          ),
-        ],
       ),
     );
   }

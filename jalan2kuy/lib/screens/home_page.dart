@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:bootstrap_icons/bootstrap_icons.dart';
-import 'profile_page.dart'; // Import halaman Profile
+import '../widgets/bottom_nav_bar.dart';
+import 'explore_page.dart';
+import 'profile_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -16,11 +18,8 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5), // Latar abu-abu sangat muda agar kartu putih terlihat
-      
-      // extendBody digunakan agar background bisa menyapu sampai ke bawah bottom nav bar
-      extendBody: true, 
-      
+      backgroundColor: const Color(0xFFF5F5F5),
+      extendBody: true,
       body: SingleChildScrollView(
         child: Column(
           children: [
@@ -29,11 +28,11 @@ class _HomePageState extends State<HomePage> {
               children: [
                 // Gambar Background Utama
                 Container(
-                  height: MediaQuery.of(context).size.height * 0.55, // Tinggi sekitar 55% dari layar
+                  height: MediaQuery.of(context).size.height * 0.55,
                   width: double.infinity,
                   decoration: const BoxDecoration(
                     image: DecorationImage(
-                      image: AssetImage('assets/images/bgfix2.jpg'), // Pastikan file gambar ini ada
+                      image: AssetImage('assets/images/bgfix2.jpg'),
                       fit: BoxFit.cover,
                     ),
                   ),
@@ -62,21 +61,20 @@ class _HomePageState extends State<HomePage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Header Logo (MENGGUNAKAN LOGO JPG)
+                        // Header Logo
                         Row(
                           children: [
-                            // Logo JPG
                             Image.asset(
-                              'assets/images/logo.png', // Sesuaikan path logo Anda
+                              'assets/images/logo.png',
                               width: 100,
                               height: 100,
                             ),
                           ],
                         ),
                         
-                        SizedBox(height: MediaQuery.of(context).size.height * 0.08), // Jarak proporsional
+                        SizedBox(height: MediaQuery.of(context).size.height * 0.08),
                         
-                        // Hero Text (RichText untuk warna berbeda)
+                        // Hero Text
                         RichText(
                           text: TextSpan(
                             style: const TextStyle(
@@ -89,7 +87,7 @@ class _HomePageState extends State<HomePage> {
                               const TextSpan(text: 'Temukan\nPetualanganmu\nBersama '),
                               TextSpan(
                                 text: 'jalan2kuy.id',
-                                style: TextStyle(color: accentCyan), // Teks warna cyan
+                                style: TextStyle(color: accentCyan),
                               ),
                             ],
                           ),
@@ -116,12 +114,11 @@ class _HomePageState extends State<HomePage> {
                             borderRadius: BorderRadius.circular(16),
                           ),
                           child: TextField(
-                            decoration: InputDecoration(
+                            decoration: const InputDecoration(
                               hintText: 'Cari destinasi yang ingin dituju..',
-                              hintStyle: const TextStyle(color: Colors.grey, fontSize: 14),
+                              hintStyle: TextStyle(color: Colors.grey, fontSize: 14),
                               border: InputBorder.none,
-                              // Icon pencarian bawaan Flutter
-                              prefixIcon: const Icon(Icons.search, color: Colors.black, size: 28),
+                              prefixIcon: Icon(Icons.search, color: Colors.black, size: 28),
                             ),
                           ),
                         ),
@@ -133,7 +130,6 @@ class _HomePageState extends State<HomePage> {
             ),
 
             // --- 2. Bagian Bawah (Menu Kategori Kartu Putih) ---
-            // Kita angkat sedikit ke atas agar menumpuk rapat dengan gambar background
             Transform.translate(
               offset: const Offset(0, -20), 
               child: Container(
@@ -153,140 +149,134 @@ class _HomePageState extends State<HomePage> {
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // MENGGUNAKAN BOOTSTRAP ICONS DI SINI
-                    _buildCategoryItem(BootstrapIcons.globe_americas, 'Destinasi', Colors.blue),
-                    _buildCategoryItem(BootstrapIcons.ticket_perforated, 'Tiket', Colors.orange),
-                    _buildCategoryItem(BootstrapIcons.calendar_event, 'Event', Colors.redAccent),
-                    _buildCategoryItem(BootstrapIcons.images, 'Galeri', Colors.blueAccent),
+                    // DESTINASI - KLIK UNTUK KE EXPLORE PAGE
+                    _buildCategoryItem(
+                      BootstrapIcons.globe_americas, 
+                      'Destinasi', 
+                      Colors.blue,
+                      onTap: () {
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(builder: (context) => const ExplorePage()),
+                          (route) => false,
+                        );
+                      },
+                    ),
+                    // TIKET - Belum ada halaman
+                    _buildCategoryItem(
+                      BootstrapIcons.ticket_perforated, 
+                      'Tiket', 
+                      Colors.orange,
+                      onTap: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Halaman Tiket segera hadir!')),
+                        );
+                      },
+                    ),
+                    // EVENT - Belum ada halaman
+                    _buildCategoryItem(
+                      BootstrapIcons.calendar_event, 
+                      'Event', 
+                      Colors.redAccent,
+                      onTap: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Halaman Event segera hadir!')),
+                        );
+                      },
+                    ),
+                    // GALERI - Belum ada halaman
+                    _buildCategoryItem(
+                      BootstrapIcons.images, 
+                      'Galeri', 
+                      Colors.blueAccent,
+                      onTap: () {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Halaman Galeri segera hadir!')),
+                        );
+                      },
+                    ),
                   ],
                 ),
               ),
             ),
             
-            // Jarak tambahan ke bawah agar bisa di-scroll sebelum menyentuh bottom nav
             const SizedBox(height: 80), 
           ],
         ),
       ),
 
-      // --- 3. Bottom Navigation Bar Bergaya Floating ---
-      bottomNavigationBar: Container(
-        margin: const EdgeInsets.only(left: 24, right: 24, bottom: 24), // Membuatnya mengambang
-        padding: const EdgeInsets.symmetric(vertical: 12),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(30),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.1),
-              blurRadius: 20,
-              offset: const Offset(0, 5),
-            ),
-          ],
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            // --- Home (posisi paling kiri, aktif) ---
-            _buildNavItem(Icons.home, 'Home', true), 
-            
-            // --- Ticket ---
-            GestureDetector(
-              onTap: () {
-                // Nanti bisa ditambah navigasi ke halaman Ticket
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Halaman Ticket segera hadir!')),
-                );
-              },
-              child: _buildNavItem(Icons.confirmation_num_outlined, 'Ticket', false),
-            ),
-            
-            // --- Explore ---
-            GestureDetector(
-              onTap: () {
-                // Nanti bisa ditambah navigasi ke halaman Explore
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Halaman Explore segera hadir!')),
-                );
-              },
-              child: _buildNavItem(Icons.search, 'Explore', false),
-            ),
-            
-            // --- Profile (NAVIGASI KE PROFILE PAGE) ---
-            GestureDetector(
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const ProfilePage()),
-                );
-              },
-              child: _buildNavItem(Icons.person_outline, 'Profile', false),
-            ),
-          ],
-        ),
+      // --- 3. Bottom Navigation Bar (TERPISAH) ---
+      bottomNavigationBar: CustomBottomNavBar(
+        currentIndex: 0, // Home aktif (index 0)
+        onTap: (index) {
+          if (index == 0) return; // Sudah di Home
+          
+          if (index == 1) {
+            // Navigate ke Explore
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => const ExplorePage()),
+              (route) => false,
+            );
+          } else if (index == 2) {
+            // Ticket page belum ada
+            ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Halaman Ticket segera hadir!')),
+            );
+          } else if (index == 3) {
+            // Navigate ke Profile (pakai push agar bisa kembali dengan tombol back)
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const ProfilePage()),
+            );
+          }
+        },
       ),
     );
   }
 
-  // --- Widget Bantuan untuk Ikon Kategori ---
-  Widget _buildCategoryItem(IconData icon, String label, Color iconColor) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Container(
-          width: 60,
-          height: 60,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.grey.withOpacity(0.2),
-                blurRadius: 8,
-                spreadRadius: 1,
-                offset: const Offset(0, 3),
-              ),
-            ],
+  // --- Widget Bantuan untuk Ikon Kategori (dengan onTap) ---
+  Widget _buildCategoryItem(
+    IconData icon, 
+    String label, 
+    Color iconColor, {
+    VoidCallback? onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Container(
+            width: 60,
+            height: 60,
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.grey.withOpacity(0.2),
+                  blurRadius: 8,
+                  spreadRadius: 1,
+                  offset: const Offset(0, 3),
+                ),
+              ],
+            ),
+            child: Center(
+              child: Icon(icon, size: 28, color: iconColor),
+            ),
           ),
-          child: Center(
-            // Ikon akan di-render di sini (baik bawaan Flutter maupun Bootstrap Icons)
-            child: Icon(icon, size: 28, color: iconColor),
+          const SizedBox(height: 8),
+          Text(
+            label,
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: Colors.black,
+            ),
           ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          label,
-          style: const TextStyle(
-            fontSize: 12,
-            fontWeight: FontWeight.bold,
-            color: Colors.black, // Menggunakan font warna hitam
-          ),
-        ),
-      ],
-    );
-  }
-
-  // --- Widget Bantuan untuk Bottom Navigation Item ---
-  Widget _buildNavItem(IconData icon, String label, bool isActive) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Icon(
-          icon,
-          size: 32,
-          // Ikon yang aktif akan berwarna Cyan, yang tidak akan berwarna Hitam
-          color: isActive ? accentCyan : Colors.black87,
-        ),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: TextStyle(
-            fontSize: 10,
-            fontWeight: FontWeight.bold,
-            color: isActive ? accentCyan : Colors.black87, // Teks yang tidak aktif berwarna hitam
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
