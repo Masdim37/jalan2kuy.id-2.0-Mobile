@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import '../widgets/bottom_nav_bar.dart';
 import 'home_page.dart';
+import 'event_page.dart';
 import 'profile_page.dart';
-import 'event_detail_page.dart';
 
 class EventDetailPage extends StatelessWidget {
   final Map<String, String> event;
@@ -16,10 +16,11 @@ class EventDetailPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: const Color(0xFFF2F2F2),
+      extendBody: true,
 
       body: Stack(
         children: [
-          // HEADER IMAGE
+          // ================= HEADER IMAGE =================
           SizedBox(
             height: 280,
             width: double.infinity,
@@ -29,19 +30,16 @@ class EventDetailPage extends StatelessWidget {
             ),
           ),
 
-          // OVERLAY
+          // Overlay
           Container(
             height: 280,
             color: Colors.black.withOpacity(0.35),
           ),
 
-          // HEADER CONTENT
+          // ================= HEADER CONTENT =================
           SafeArea(
             child: Padding(
-              padding: const EdgeInsets.symmetric(
-                horizontal: 20,
-                vertical: 12,
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -52,9 +50,7 @@ class EventDetailPage extends StatelessWidget {
                       color: Colors.white,
                     ),
                   ),
-
                   const Spacer(),
-
                   Text(
                     event['title']!,
                     maxLines: 3,
@@ -65,19 +61,18 @@ class EventDetailPage extends StatelessWidget {
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-
                   const SizedBox(height: 20),
                 ],
               ),
             ),
           ),
 
-          // DETAIL CARD
+          // ================= DETAIL CARD =================
           Positioned(
             top: 240,
             left: 16,
             right: 16,
-            bottom: 20,
+            bottom: 90, // ⬅️ ruang untuk bottom nav
             child: Container(
               padding: const EdgeInsets.all(18),
               decoration: BoxDecoration(
@@ -91,10 +86,8 @@ class EventDetailPage extends StatelessWidget {
                   ),
                 ],
               ),
-
               child: Column(
                 children: [
-                  // IMAGE PREVIEW + MAP
                   Row(
                     children: [
                       Expanded(
@@ -107,9 +100,7 @@ class EventDetailPage extends StatelessWidget {
                           ),
                         ),
                       ),
-
                       const SizedBox(width: 12),
-
                       Expanded(
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(12),
@@ -136,60 +127,47 @@ class EventDetailPage extends StatelessWidget {
                     ),
                   ),
 
-                  const SizedBox(height: 10),
+                  const SizedBox(height: 8),
 
                   Align(
                     alignment: Alignment.centerLeft,
-                    child: Text(
-                      "Tanggal : ${event['date']}",
-                      style: const TextStyle(fontSize: 13),
-                    ),
+                    child: Text("Tanggal : ${event['date']}"),
                   ),
-
-                  const SizedBox(height: 4),
-
                   Align(
                     alignment: Alignment.centerLeft,
-                    child: Text(
-                      "Jam : ${event['time']}",
-                      style: const TextStyle(fontSize: 13),
-                    ),
+                    child: Text("Jam : ${event['time']}"),
                   ),
 
-                  const SizedBox(height: 4),
+                  const SizedBox(height: 6),
 
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
                       "Harga Tiket : ${event['price']}",
                       style: const TextStyle(
-                        fontSize: 13,
                         color: Color(0xFF0B8B62),
                         fontWeight: FontWeight.bold,
                       ),
                     ),
                   ),
 
-                  const SizedBox(height: 14),
+                  const SizedBox(height: 12),
 
                   Expanded(
                     child: SingleChildScrollView(
                       child: Text(
                         event['description']!,
                         textAlign: TextAlign.justify,
-                        style: const TextStyle(
-                          fontSize: 13,
-                          height: 1.6,
-                        ),
+                        style: const TextStyle(height: 1.6),
                       ),
                     ),
                   ),
 
-                  const SizedBox(height: 15),
+                  const SizedBox(height: 12),
 
                   SizedBox(
                     width: double.infinity,
-                    height: 50,
+                    height: 48,
                     child: ElevatedButton(
                       onPressed: () {},
                       style: ElevatedButton.styleFrom(
@@ -203,7 +181,6 @@ class EventDetailPage extends StatelessWidget {
                         style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.w600,
-                          fontSize: 15,
                         ),
                       ),
                     ),
@@ -213,6 +190,32 @@ class EventDetailPage extends StatelessWidget {
             ),
           ),
         ],
+      ),
+
+      // ================= BOTTOM NAVIGATION =================
+      bottomNavigationBar: CustomBottomNavBar(
+        currentIndex: 1,
+        onTap: (index) {
+          if (index == 0) {
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (_) => const HomePage()),
+              (route) => false,
+            );
+          } else if (index == 1) {
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (_) => const EventPage()),
+              (route) => false,
+            );
+          } else if (index == 3) {
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (_) => const ProfilePage()),
+              (route) => false,
+            );
+          }
+        },
       ),
     );
   }
