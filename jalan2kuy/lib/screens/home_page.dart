@@ -66,18 +66,10 @@ class _HomePageState extends State<HomePage> {
                           children: [
                             Image.asset(
                               'assets/images/logo.png',
-                              width: 40,
-                              height: 40,
+                              width: 100,
+                              height: 100,
                             ),
                             const SizedBox(width: 8),
-                            const Text(
-                              'jalan2kuy.id',
-                              style: TextStyle(
-                                color: Colors.white,
-                                fontSize: 16,
-                                fontWeight: FontWeight.bold,
-                              ),
-                            ),
                           ],
                         ),
                         

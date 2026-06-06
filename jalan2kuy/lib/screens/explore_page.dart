@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../widgets/bottom_nav_bar.dart';
 import 'home_page.dart';
 import 'profile_page.dart';
+import 'category_detail_page.dart';
 
 class ExplorePage extends StatefulWidget {
   const ExplorePage({Key? key}) : super(key: key);
@@ -11,14 +12,14 @@ class ExplorePage extends StatefulWidget {
 }
 
 class _ExplorePageState extends State<ExplorePage> {
-  // Data placeholder untuk kategori (nanti diganti dengan API)
-  final List<Map<String, String>> categories = [
-    {'id': 'ctg001', 'name': 'Nature'},
-    {'id': 'ctg002', 'name': 'History'},
-    {'id': 'ctg003', 'name': 'Ecotourism'},
-    {'id': 'ctg004', 'name': 'Beach'},
-    {'id': 'ctg005', 'name': 'Culture'},
-    {'id': 'ctg006', 'name': 'Education'},
+  // Data kategori dengan gambar (sesuai database)
+  final List<Map<String, String>> categories = const [
+    {'id': 'ctg001', 'name': 'Nature', 'image': 'assets/descategories/nature.png'},
+    {'id': 'ctg002', 'name': 'History', 'image': 'assets/descategories/history.jpg'},
+    {'id': 'ctg003', 'name': 'Ecotourism', 'image': 'assets/descategories/ecotourism.png'},
+    {'id': 'ctg004', 'name': 'Beach', 'image': 'assets/descategories/beach.jpg'},
+    {'id': 'ctg005', 'name': 'Culture', 'image': 'assets/descategories/culture.jpg'},
+    {'id': 'ctg006', 'name': 'Education', 'image': 'assets/descategories/education.jpg'},
   ];
 
   @override
@@ -34,8 +35,7 @@ class _ExplorePageState extends State<ExplorePage> {
                 height: 280,
                 decoration: const BoxDecoration(
                   image: DecorationImage(
-                    // Background dari gambar kategori (atau gambar umum)
-                    image: AssetImage('assets/images/bgfix2.jpg'), // GANTI dengan gambar background yang kamu punya
+                    image: AssetImage('assets/images/bgfix2.jpg'),
                     fit: BoxFit.cover,
                   ),
                 ),
@@ -58,11 +58,11 @@ class _ExplorePageState extends State<ExplorePage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Logo & Nama App (JPG)
+                      // Logo & Nama App
                       Row(
                         children: [
                           Image.asset(
-                            'assets/images/logo.png', 
+                            'assets/images/logo.png',
                             width: 100,
                             height: 100,
                           ),
@@ -122,7 +122,7 @@ class _ExplorePageState extends State<ExplorePage> {
                 itemCount: categories.length,
                 itemBuilder: (context, index) {
                   final category = categories[index];
-                  return _buildCategoryCard(category);
+                  return _buildCategoryCard(context, category);
                 },
               ),
             ),
@@ -135,7 +135,6 @@ class _ExplorePageState extends State<ExplorePage> {
         currentIndex: 1, // Explore aktif (index 1)
         onTap: (index) {
           if (index == 0) {
-            // Navigate ke Home
             Navigator.pushAndRemoveUntil(
               context,
               MaterialPageRoute(builder: (context) => const HomePage()),
@@ -143,12 +142,10 @@ class _ExplorePageState extends State<ExplorePage> {
             );
           } else if (index == 1) return; // Sudah di Explore
           else if (index == 2) {
-            // Ticket page belum ada
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(content: Text('Halaman Ticket segera hadir!')),
             );
           } else if (index == 3) {
-            // Navigate ke Profile
             Navigator.pushAndRemoveUntil(
               context,
               MaterialPageRoute(builder: (context) => const ProfilePage()),
@@ -160,70 +157,93 @@ class _ExplorePageState extends State<ExplorePage> {
     );
   }
 
-  Widget _buildCategoryCard(Map<String, String> category) {
-    return Container(
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(16),
-        color: Colors.white,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 8,
-            offset: const Offset(0, 4),
+  // Card Kategori dengan Gambar
+  Widget _buildCategoryCard(BuildContext context, Map<String, String> category) {
+    return GestureDetector(
+      onTap: () {
+        // Navigasi ke halaman detail kategori
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => CategoryDetailPage(
+              categoryId: category['id']!,
+              categoryName: category['name']!,
+              categoryImage: category['image']!,
+            ),
           ),
-        ],
-      ),
-      child: Stack(
-        children: [
-          // Kotak placeholder dengan gradient
-          ClipRRect(
-            borderRadius: BorderRadius.circular(16),
-            child: Container(
+        );
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(16),
+          color: Colors.white,
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 8,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        ),
+        child: Stack(
+          children: [
+            // Gambar Kategori
+            ClipRRect(
+              borderRadius: BorderRadius.circular(16),
+              child: Image.asset(
+                category['image']!,
+                fit: BoxFit.cover,
+                width: double.infinity,
+                height: double.infinity,
+                errorBuilder: (context, error, stackTrace) {
+                  // Fallback jika gambar tidak ditemukan
+                  return Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        colors: [
+                          Colors.grey.shade300,
+                          Colors.grey.shade400,
+                        ],
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                      ),
+                    ),
+                    child: const Icon(
+                      Icons.image,
+                      size: 50,
+                      color: Colors.grey,
+                    ),
+                  );
+                },
+              ),
+            ),
+            // Overlay gelap
+            Container(
               decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(16),
                 gradient: LinearGradient(
                   colors: [
-                    Colors.grey.shade300,
-                    Colors.grey.shade400,
+                    Colors.black.withOpacity(0.6),
+                    Colors.black.withOpacity(0.3),
                   ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-              ),
-              child: Center(
-                child: Icon(
-                  Icons.image,
-                  size: 50,
-                  color: Colors.grey.shade600,
+                  begin: Alignment.topCenter,
+                  end: Alignment.bottomCenter,
                 ),
               ),
             ),
-          ),
-          // Overlay gelap
-          Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(16),
-              gradient: LinearGradient(
-                colors: [
-                  Colors.black.withOpacity(0.5),
-                  Colors.black.withOpacity(0.2),
-                ],
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
+            // Text kategori di tengah
+            Center(
+              child: Text(
+                category['name']!,
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
               ),
             ),
-          ),
-          // Text kategori di tengah
-          Center(
-            child: Text(
-              category['name']!,
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-              ),
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
