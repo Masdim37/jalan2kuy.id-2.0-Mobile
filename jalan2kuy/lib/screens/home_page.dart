@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:bootstrap_icons/bootstrap_icons.dart';
+import 'package:jalan2kuy/screens/event_page.dart';
 import '../widgets/bottom_nav_bar.dart';
 import 'explore_page.dart';
 import 'profile_page.dart';
@@ -37,7 +38,7 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
                 ),
-                
+
                 // Gradien gelap agar teks putih di atas gambar mudah dibaca
                 Container(
                   height: MediaQuery.of(context).size.height * 0.55,
@@ -53,11 +54,14 @@ class _HomePageState extends State<HomePage> {
                     ),
                   ),
                 ),
-                
+
                 // Konten di Atas Gambar
                 SafeArea(
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 24.0,
+                      vertical: 16.0,
+                    ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -72,9 +76,11 @@ class _HomePageState extends State<HomePage> {
                             const SizedBox(width: 8),
                           ],
                         ),
-                        
-                        SizedBox(height: MediaQuery.of(context).size.height * 0.08),
-                        
+
+                        SizedBox(
+                          height: MediaQuery.of(context).size.height * 0.08,
+                        ),
+
                         // Hero Text
                         RichText(
                           text: TextSpan(
@@ -85,7 +91,9 @@ class _HomePageState extends State<HomePage> {
                               height: 1.3,
                             ),
                             children: [
-                              const TextSpan(text: 'Temukan\nPetualanganmu\nBersama '),
+                              const TextSpan(
+                                text: 'Temukan\nPetualanganmu\nBersama ',
+                              ),
                               TextSpan(
                                 text: 'jalan2kuy.id',
                                 style: TextStyle(color: accentCyan),
@@ -94,7 +102,7 @@ class _HomePageState extends State<HomePage> {
                           ),
                         ),
                         const SizedBox(height: 16),
-                        
+
                         // Sub-hero Text
                         const Text(
                           'Kami menawarkan berbagai\ninformasi tentang wisata, event\ndan gambar wisata untuk anda',
@@ -106,10 +114,13 @@ class _HomePageState extends State<HomePage> {
                           ),
                         ),
                         const SizedBox(height: 32),
-                        
+
                         // Search Bar
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.white,
                             borderRadius: BorderRadius.circular(16),
@@ -117,15 +128,22 @@ class _HomePageState extends State<HomePage> {
                           child: TextField(
                             decoration: const InputDecoration(
                               hintText: 'Cari destinasi yang ingin dituju..',
-                              hintStyle: TextStyle(color: Colors.grey, fontSize: 14),
+                              hintStyle: TextStyle(
+                                color: Colors.grey,
+                                fontSize: 14,
+                              ),
                               border: InputBorder.none,
-                              prefixIcon: Icon(Icons.search, color: Colors.black, size: 28),
+                              prefixIcon: Icon(
+                                Icons.search,
+                                color: Colors.black,
+                                size: 28,
+                              ),
                             ),
                           ),
                         ),
-                        
+
                         const SizedBox(height: 16),
-                        
+
                         // --- 2. Menu Kategori (Destinasi, Tiket, Event, Galeri) ---
                         Container(
                           padding: const EdgeInsets.all(20),
@@ -145,47 +163,60 @@ class _HomePageState extends State<HomePage> {
                             children: [
                               // DESTINASI - KLIK UNTUK KE EXPLORE PAGE
                               _buildCategoryItem(
-                                BootstrapIcons.globe_americas, 
-                                'Destinasi', 
+                                BootstrapIcons.globe_americas,
+                                'Destinasi',
                                 Colors.blue,
                                 onTap: () {
                                   Navigator.pushAndRemoveUntil(
                                     context,
-                                    MaterialPageRoute(builder: (context) => const ExplorePage()),
+                                    MaterialPageRoute(
+                                      builder: (context) => const ExplorePage(),
+                                    ),
                                     (route) => false,
                                   );
                                 },
                               ),
                               // TIKET - Belum ada halaman
                               _buildCategoryItem(
-                                BootstrapIcons.ticket_perforated, 
-                                'Tiket', 
+                                BootstrapIcons.ticket_perforated,
+                                'Tiket',
                                 Colors.orange,
                                 onTap: () {
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text('Halaman Tiket segera hadir!')),
+                                    const SnackBar(
+                                      content: Text(
+                                        'Halaman Tiket segera hadir!',
+                                      ),
+                                    ),
                                   );
                                 },
                               ),
                               // EVENT - Belum ada halaman
                               _buildCategoryItem(
-                                BootstrapIcons.calendar_event, 
-                                'Event', 
+                                BootstrapIcons.calendar_event,
+                                'Event',
                                 Colors.redAccent,
                                 onTap: () {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text('Halaman Event segera hadir!')),
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const EventPage(),
+                                    ),
                                   );
                                 },
                               ),
                               // GALERI - Belum ada halaman
                               _buildCategoryItem(
-                                BootstrapIcons.images, 
-                                'Galeri', 
+                                BootstrapIcons.images,
+                                'Galeri',
                                 Colors.blueAccent,
                                 onTap: () {
                                   ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(content: Text('Halaman Galeri segera hadir!')),
+                                    const SnackBar(
+                                      content: Text(
+                                        'Halaman Galeri segera hadir!',
+                                      ),
+                                    ),
                                   );
                                 },
                               ),
@@ -198,8 +229,8 @@ class _HomePageState extends State<HomePage> {
                 ),
               ],
             ),
-            
-            const SizedBox(height: 80), 
+
+            const SizedBox(height: 80),
           ],
         ),
       ),
@@ -209,7 +240,7 @@ class _HomePageState extends State<HomePage> {
         currentIndex: 0, // Home aktif (index 0)
         onTap: (index) {
           if (index == 0) return; // Sudah di Home
-          
+
           if (index == 1) {
             // Navigate ke Explore
             Navigator.pushAndRemoveUntil(
@@ -236,8 +267,8 @@ class _HomePageState extends State<HomePage> {
 
   // --- Widget Bantuan untuk Ikon Kategori (dengan onTap) ---
   Widget _buildCategoryItem(
-    IconData icon, 
-    String label, 
+    IconData icon,
+    String label,
     Color iconColor, {
     VoidCallback? onTap,
   }) {
@@ -261,9 +292,7 @@ class _HomePageState extends State<HomePage> {
                 ),
               ],
             ),
-            child: Center(
-              child: Icon(icon, size: 28, color: iconColor),
-            ),
+            child: Center(child: Icon(icon, size: 28, color: iconColor)),
           ),
           const SizedBox(height: 8),
           Text(
