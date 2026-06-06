@@ -5,7 +5,8 @@ import 'event_page.dart';
 import 'profile_page.dart';
 
 class EventDetailPage extends StatelessWidget {
-  final Map<String, String> event;
+  // Changed from Map<String, String> to Map<String, dynamic> to accept DateTime types
+  final Map<String, dynamic> event;
 
   const EventDetailPage({
     Key? key,
@@ -25,7 +26,7 @@ class EventDetailPage extends StatelessWidget {
             height: 280,
             width: double.infinity,
             child: Image.asset(
-              event['image']!,
+              event['image'].toString(), // Safely convert dynamic to string
               fit: BoxFit.cover,
             ),
           ),
@@ -52,7 +53,7 @@ class EventDetailPage extends StatelessWidget {
                   ),
                   const Spacer(),
                   Text(
-                    event['title']!,
+                    event['title']?.toString() ?? '',
                     maxLines: 3,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
@@ -72,7 +73,7 @@ class EventDetailPage extends StatelessWidget {
             top: 240,
             left: 16,
             right: 16,
-            bottom: 90, // ⬅️ ruang untuk bottom nav
+            bottom: 90, // ruang untuk bottom nav
             child: Container(
               padding: const EdgeInsets.all(18),
               decoration: BoxDecoration(
@@ -94,7 +95,7 @@ class EventDetailPage extends StatelessWidget {
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(12),
                           child: Image.asset(
-                            event['image']!,
+                            event['image'].toString(),
                             height: 110,
                             fit: BoxFit.cover,
                           ),
@@ -119,7 +120,7 @@ class EventDetailPage extends StatelessWidget {
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      event['location']!,
+                      event['location']?.toString() ?? '',
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 15,
@@ -129,6 +130,7 @@ class EventDetailPage extends StatelessWidget {
 
                   const SizedBox(height: 8),
 
+                  // String interpolation handles DateTime objects smoothly here
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Text("Tanggal : ${event['date']}"),
@@ -156,7 +158,7 @@ class EventDetailPage extends StatelessWidget {
                   Expanded(
                     child: SingleChildScrollView(
                       child: Text(
-                        event['description']!,
+                        event['description']?.toString() ?? '',
                         textAlign: TextAlign.justify,
                         style: const TextStyle(height: 1.6),
                       ),
