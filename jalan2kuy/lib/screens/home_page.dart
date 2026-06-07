@@ -1,11 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:bootstrap_icons/bootstrap_icons.dart';
 import 'package:jalan2kuy/screens/event_page.dart';
-import 'package:jalan2kuy/screens/galeri_page.dart';
 import '../widgets/bottom_nav_bar.dart';
 import 'explore_page.dart';
 import 'profile_page.dart';
-import 'galeri_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -193,7 +191,7 @@ class _HomePageState extends State<HomePage> {
                                   );
                                 },
                               ),
-                              // EVENT
+                              // EVENT - Belum ada halaman
                               _buildCategoryItem(
                                 BootstrapIcons.calendar_event,
                                 'Event',
@@ -213,10 +211,11 @@ class _HomePageState extends State<HomePage> {
                                 'Galeri',
                                 Colors.blueAccent,
                                 onTap: () {
-                                  Navigator.push(
-                                    context,
-                                    MaterialPageRoute(
-                                      builder: (context) => const GaleriPage(),
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    const SnackBar(
+                                      content: Text(
+                                        'Halaman Galeri segera hadir!',
+                                      ),
                                     ),
                                   );
                                 },
