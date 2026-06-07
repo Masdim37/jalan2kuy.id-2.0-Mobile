@@ -235,7 +235,7 @@ class _CategoryDetailPageState extends State<CategoryDetailPage> {
           context,
           MaterialPageRoute(
             builder: (context) => DestinationDetailPage(
-              destinationId: destination['destinationID']?.toString() ?? '',
+              destinationID: destination['destinationID']?.toString() ?? '',
               destinationName: destination['name'] ?? '-',
               destinationThumbnail: imageUrl,
             ),

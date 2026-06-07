@@ -4,6 +4,7 @@ import 'package:jalan2kuy/screens/event_page.dart';
 import '../widgets/bottom_nav_bar.dart';
 import 'explore_page.dart';
 import 'profile_page.dart';
+import 'galeri_page.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -115,33 +116,6 @@ class _HomePageState extends State<HomePage> {
                         ),
                         const SizedBox(height: 32),
 
-                        // Search Bar
-                        Container(
-                          padding: const EdgeInsets.symmetric(
-                            horizontal: 8,
-                            vertical: 4,
-                          ),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: TextField(
-                            decoration: const InputDecoration(
-                              hintText: 'Cari destinasi yang ingin dituju..',
-                              hintStyle: TextStyle(
-                                color: Colors.grey,
-                                fontSize: 14,
-                              ),
-                              border: InputBorder.none,
-                              prefixIcon: Icon(
-                                Icons.search,
-                                color: Colors.black,
-                                size: 28,
-                              ),
-                            ),
-                          ),
-                        ),
-
                         const SizedBox(height: 16),
 
                         // --- 2. Menu Kategori (Destinasi, Tiket, Event, Galeri) ---
@@ -211,11 +185,10 @@ class _HomePageState extends State<HomePage> {
                                 'Galeri',
                                 Colors.blueAccent,
                                 onTap: () {
-                                  ScaffoldMessenger.of(context).showSnackBar(
-                                    const SnackBar(
-                                      content: Text(
-                                        'Halaman Galeri segera hadir!',
-                                      ),
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => const GaleriPage(),
                                     ),
                                   );
                                 },

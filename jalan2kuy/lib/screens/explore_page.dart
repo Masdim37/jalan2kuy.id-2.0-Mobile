@@ -297,7 +297,7 @@ class _ExplorePageState extends State<ExplorePage> {
             context,
             MaterialPageRoute(
               builder: (context) => DestinationDetailPage(
-                destinationId: id,
+                destinationID: id,
                 destinationName: title,
                 destinationThumbnail: imageUrl,
               ),
