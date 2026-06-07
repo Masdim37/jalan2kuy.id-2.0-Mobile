@@ -3,6 +3,7 @@ import '../widgets/bottom_nav_bar.dart';
 import 'home_page.dart';
 import 'profile_page.dart';
 import 'event_detail_page.dart';
+import 'ticket_beli_page.dart';
 
 class EventDetailPage extends StatelessWidget {
   final Map<String, String> event;
@@ -191,7 +192,14 @@ class EventDetailPage extends StatelessWidget {
                     width: double.infinity,
                     height: 50,
                     child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => TicketBeliPage(event: event),
+                            ),
+                          );
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF17C3A5),
                         shape: RoundedRectangleBorder(
