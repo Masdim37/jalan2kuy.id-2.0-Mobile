@@ -1,3 +1,8 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import '../config/api_config.dart';
+import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
 import 'package:jalan2kuy/screens/ticket_beli_page.dart';
 import '../widgets/bottom_nav_bar.dart';
@@ -6,13 +11,75 @@ import 'event_page.dart';
 import 'profile_page.dart';
 import 'ticket_beli_page.dart';
 
-class EventDetailPage extends StatelessWidget {
-  final Map<String, String> event;
+class EventDetailPage extends StatefulWidget {
+  final String eventID;
+  const EventDetailPage({Key? key, required this.eventID}) : super(key: key);
 
-  const EventDetailPage({Key? key, required this.event}) : super(key: key);
+  @override
+  State<EventDetailPage> createState() => _EventDetailPage();
+}
+
+class _EventDetailPage extends State<EventDetailPage> {
+  Map<String, dynamic>? eventDetail;
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchEventDetail();
+  }
+
+  Future<void> fetchEventDetail() async {
+    setState(() => isLoading = true);
+
+    try {
+      String url = '${ApiConfig.eventDetail}?eventID=${widget.eventID}';
+
+      print("🌍 MENGHUBUNGI URL: $url");
+
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString('token');
+
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+          'Connection': 'keep-alive',
+        },
+      );
+
+      // CCTV 2: Lihat status balasan dari Laravel
+      print("🚀 STATUS CODE: ${response.statusCode}");
+      // CCTV 3: Lihat isi JSON yang ditangkap Flutter
+      print("📦 ISI RESPONSE: ${response.body}");
+
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
+
+        // CCTV 4: Pastikan status success-nya true
+        print("✅ SUCCESS STATUS: ${responseData['success']}");
+
+        setState(() {
+          eventDetail = responseData['data'];
+          isLoading = false;
+        });
+      } else {
+        print("❌ GAGAL! SERVER MERESPON: ${response.statusCode}");
+        setState(() => isLoading = false);
+      }
+    } catch (e) {
+      print("🚨 KONEKSI ERROR (MUNGKIN SALAH IP): $e");
+      print("Error fetching detail: $e");
+      setState(() => isLoading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
+    final String imagePath = eventDetail?['imagePath'] ?? '';
+    final String imageUrl = '${ApiConfig.storageUrl}/$imagePath';
+
     return Scaffold(
       backgroundColor: const Color(0xFFF2F2F2),
       extendBody: true,
@@ -23,7 +90,12 @@ class EventDetailPage extends StatelessWidget {
           SizedBox(
             height: 280,
             width: double.infinity,
-            child: Image.asset(event['image']!, fit: BoxFit.cover),
+            child: Image.network(
+              imageUrl,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) =>
+                  Container(color: Colors.grey.shade400),
+            ),
           ),
 
           // Overlay
@@ -45,7 +117,7 @@ class EventDetailPage extends StatelessWidget {
                   ),
                   const Spacer(),
                   Text(
-                    event['title']!,
+                    eventDetail?['name']!,
                     maxLines: 3,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
@@ -65,7 +137,7 @@ class EventDetailPage extends StatelessWidget {
             top: 240,
             left: 16,
             right: 16,
-            bottom: 90, // ⬅️ ruang untuk bottom nav
+            bottom: 50, // ⬅️ ruang untuk bottom nav
             child: Container(
               padding: const EdgeInsets.all(18),
               decoration: BoxDecoration(
@@ -86,8 +158,8 @@ class EventDetailPage extends StatelessWidget {
                       Expanded(
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(12),
-                          child: Image.asset(
-                            event['image']!,
+                          child: Image.network(
+                            imageUrl,
                             height: 110,
                             fit: BoxFit.cover,
                           ),
@@ -112,7 +184,7 @@ class EventDetailPage extends StatelessWidget {
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      event['location']!,
+                      eventDetail?['location']!,
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 15,
@@ -124,11 +196,15 @@ class EventDetailPage extends StatelessWidget {
 
                   Align(
                     alignment: Alignment.centerLeft,
-                    child: Text("Tanggal : ${event['date']}"),
+                    child: Text(
+                      "Tanggal : '${eventDetail?['startDate']}' - '${eventDetail?['endDate']}'",
+                    ),
                   ),
                   Align(
                     alignment: Alignment.centerLeft,
-                    child: Text("Jam : ${event['time']}"),
+                    child: Text(
+                      "Jam : '${eventDetail?['startTime']}' - '${eventDetail?['endTime']}'",
+                    ),
                   ),
 
                   const SizedBox(height: 6),
@@ -136,7 +212,7 @@ class EventDetailPage extends StatelessWidget {
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      "Harga Tiket : ${event['price']}",
+                      "Harga Tiket : ${eventDetail?['entranceFee']}",
                       style: const TextStyle(
                         color: Color(0xFF0B8B62),
                         fontWeight: FontWeight.bold,
@@ -149,7 +225,7 @@ class EventDetailPage extends StatelessWidget {
                   Expanded(
                     child: SingleChildScrollView(
                       child: Text(
-                        event['description']!,
+                        eventDetail?['description']!,
                         textAlign: TextAlign.justify,
                         style: const TextStyle(height: 1.6),
                       ),
@@ -166,7 +242,9 @@ class EventDetailPage extends StatelessWidget {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => TicketBeliPage(event: event),
+                            builder: (context) => TicketBeliPage(
+                              eventID: eventDetail?['eventID'],
+                            ),
                           ),
                         );
                       },
@@ -177,7 +255,7 @@ class EventDetailPage extends StatelessWidget {
                         ),
                       ),
                       child: Text(
-                        "Beli Tiket (${event['price']})",
+                        "Beli Tiket (${eventDetail?['entranceFee']})",
                         style: const TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.w600,

@@ -169,15 +169,6 @@ class _EventPageState extends State<EventPage> {
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
                           Image.asset('assets/images/logo.png', width: 80),
-                          // Tombol reset filter muncul jika salah satu tanggal terisi
-                          if (tanggalMulai != null || tanggalSelesai != null)
-                            IconButton(
-                              icon: const Icon(
-                                Icons.refresh,
-                                color: Colors.white,
-                              ),
-                              onPressed: _resetFilterTanggal,
-                            ),
                         ],
                       ),
                       const SizedBox(height: 20),
@@ -227,6 +218,40 @@ class _EventPageState extends State<EventPage> {
                         isFiltered: tanggalSelesai != null,
                       ),
                     ),
+                    // Tombol reset filter muncul jika salah satu tanggal terisi
+                    if (tanggalMulai != null || tanggalSelesai != null)
+                      ElevatedButton.icon(
+                        onPressed: _resetFilterTanggal,
+                        icon: const Icon(
+                          Icons.restore,
+                          size: 16,
+                        ), // Ikon diperkecil sedikit agar pas
+                        label: const Text(
+                          "Reset",
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Color(
+                            0xFFDDE8D8,
+                          ), // Latar belakang putih transparan
+                          foregroundColor:
+                              Colors.black87, // Warna teks dan ikon putih
+                          elevation:
+                              0, // Dihilangkan bayangannya agar tampak menyatu dengan background
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 14,
+                            vertical: 6,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(
+                              20,
+                            ), // Bentuk melengkung (pill)
+                          ),
+                        ),
+                      ),
                   ],
                 ),
               ),
@@ -258,15 +283,33 @@ class _EventPageState extends State<EventPage> {
                 String endRaw = event['endDate'] ?? event['date'] ?? '-';
 
                 // Memotong huruf 'T' (bawaan Laravel) ATAU spasi sekaligus, lalu ambil bagian depannya saja [0]
-                String startDateOnly = startRaw.split('T')[0].split(' ')[0];
-                String endDateOnly = endRaw.split('T')[0].split(' ')[0];
+                String startDateBefore = startRaw.split('T')[0].split(' ')[0];
+                String endDateBefore = endRaw.split('T')[0].split(' ')[0];
+
+                // 2. Buat fungsi pembantu kecil untuk membalik string
+                String ubahKeDDMMYYYY(String dateStr) {
+                  if (dateStr == '-') return '-';
+
+                  // Pecah YYYY-MM-DD menjadi [YYYY, MM, DD]
+                  List<String> parts = dateStr.split('-');
+
+                  if (parts.length == 3) {
+                    // Susun terbalik menjadi DD-MM-YYYY
+                    return '${parts[2]}/${parts[1]}/${parts[0]}';
+                  }
+                  return dateStr;
+                }
+
+                String startDateAfter = ubahKeDDMMYYYY(startDateBefore);
+                String endDateAfter = ubahKeDDMMYYYY(endDateBefore);
 
                 return GestureDetector(
                   onTap: () {
                     Navigator.push(
                       context,
                       MaterialPageRoute(
-                        builder: (_) => EventDetailPage(event: event),
+                        builder: (_) =>
+                            EventDetailPage(eventID: event['eventID']),
                       ),
                     );
                   },
@@ -329,7 +372,7 @@ class _EventPageState extends State<EventPage> {
                               ),
                               const SizedBox(height: 6),
                               Text(
-                                "$startDateOnly - $endDateOnly",
+                                "$startDateAfter - $endDateAfter",
                                 style: const TextStyle(fontSize: 10),
                               ),
                               const SizedBox(height: 4),

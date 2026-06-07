@@ -1,10 +1,73 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import '../config/api_config.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
 import 'success_page.dart';
 
-class TicketBeliPage extends StatelessWidget {
-  final Map<String, String> event;
+class TicketBeliPage extends StatefulWidget {
+  final String eventID;
+  const TicketBeliPage({Key? key, required this.eventID}) : super(key: key);
 
-  const TicketBeliPage({Key? key, required this.event}) : super(key: key);
+  @override
+  State<TicketBeliPage> createState() => _TicketBeliPage();
+}
+
+class _TicketBeliPage extends State<TicketBeliPage> {
+  Map<String, dynamic>? eventBeliDetail;
+  bool isLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    fetchEventBeliDetail();
+  }
+
+  Future<void> fetchEventBeliDetail() async {
+    setState(() => isLoading = true);
+
+    try {
+      String url = '${ApiConfig.eventBeliTiket}?eventID=${widget.eventID}';
+
+      print("🌍 MENGHUBUNGI URL: $url");
+
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      String? token = prefs.getString('token');
+
+      final response = await http.get(
+        Uri.parse(url),
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+          'Connection': 'keep-alive',
+        },
+      );
+
+      // CCTV 2: Lihat status balasan dari Laravel
+      print("🚀 STATUS CODE: ${response.statusCode}");
+      // CCTV 3: Lihat isi JSON yang ditangkap Flutter
+      print("📦 ISI RESPONSE: ${response.body}");
+
+      if (response.statusCode == 200) {
+        final responseData = jsonDecode(response.body);
+
+        // CCTV 4: Pastikan status success-nya true
+        print("✅ SUCCESS STATUS: ${responseData['success']}");
+
+        setState(() {
+          eventBeliDetail = responseData['data'];
+          isLoading = false;
+        });
+      } else {
+        print("❌ GAGAL! SERVER MERESPON: ${response.statusCode}");
+        setState(() => isLoading = false);
+      }
+    } catch (e) {
+      print("🚨 KONEKSI ERROR (MUNGKIN SALAH IP): $e");
+      print("Error fetching detail: $e");
+      setState(() => isLoading = false);
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,15 +106,18 @@ class TicketBeliPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    event['title'] ?? 'Nama Event',
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    eventBeliDetail?['name'] ?? 'Nama Event',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const Divider(height: 30),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
                       const Text("Tanggal"),
-                      Text(event['date'] ?? '-'),
+                      Text(eventBeliDetail?['startDate'] ?? '-'),
                     ],
                   ),
                   const SizedBox(height: 10),
@@ -60,7 +126,7 @@ class TicketBeliPage extends StatelessWidget {
                     children: [
                       const Text("Total Pembayaran"),
                       Text(
-                        event['price'] ?? 'Rp 0',
+                        eventBeliDetail?['entranceFee'] ?? '',
                         style: const TextStyle(
                           color: Color(0xFF0B8B62),
                           fontWeight: FontWeight.bold,
@@ -73,7 +139,7 @@ class TicketBeliPage extends StatelessWidget {
               ),
             ),
             const Spacer(),
-            
+
             SizedBox(
               width: double.infinity,
               height: 50,
