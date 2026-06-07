@@ -1,17 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:jalan2kuy/screens/ticket_beli_page.dart';
 import '../widgets/bottom_nav_bar.dart';
 import 'home_page.dart';
 import 'event_page.dart';
 import 'profile_page.dart';
+import 'ticket_beli_page.dart';
 
 class EventDetailPage extends StatelessWidget {
-  // Changed from Map<String, String> to Map<String, dynamic> to accept DateTime types
-  final Map<String, dynamic> event;
+  final Map<String, String> event;
 
-  const EventDetailPage({
-    Key? key,
-    required this.event,
-  }) : super(key: key);
+  const EventDetailPage({Key? key, required this.event}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -25,17 +23,11 @@ class EventDetailPage extends StatelessWidget {
           SizedBox(
             height: 280,
             width: double.infinity,
-            child: Image.asset(
-              event['image'].toString(), // Safely convert dynamic to string
-              fit: BoxFit.cover,
-            ),
+            child: Image.asset(event['image']!, fit: BoxFit.cover),
           ),
 
           // Overlay
-          Container(
-            height: 280,
-            color: Colors.black.withOpacity(0.35),
-          ),
+          Container(height: 280, color: Colors.black.withOpacity(0.35)),
 
           // ================= HEADER CONTENT =================
           SafeArea(
@@ -53,7 +45,7 @@ class EventDetailPage extends StatelessWidget {
                   ),
                   const Spacer(),
                   Text(
-                    event['title']?.toString() ?? '',
+                    event['title']!,
                     maxLines: 3,
                     overflow: TextOverflow.ellipsis,
                     style: const TextStyle(
@@ -73,7 +65,7 @@ class EventDetailPage extends StatelessWidget {
             top: 240,
             left: 16,
             right: 16,
-            bottom: 90, // ruang untuk bottom nav
+            bottom: 90, // ⬅️ ruang untuk bottom nav
             child: Container(
               padding: const EdgeInsets.all(18),
               decoration: BoxDecoration(
@@ -95,7 +87,7 @@ class EventDetailPage extends StatelessWidget {
                         child: ClipRRect(
                           borderRadius: BorderRadius.circular(12),
                           child: Image.asset(
-                            event['image'].toString(),
+                            event['image']!,
                             height: 110,
                             fit: BoxFit.cover,
                           ),
@@ -120,7 +112,7 @@ class EventDetailPage extends StatelessWidget {
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Text(
-                      event['location']?.toString() ?? '',
+                      event['location']!,
                       style: const TextStyle(
                         fontWeight: FontWeight.bold,
                         fontSize: 15,
@@ -130,7 +122,6 @@ class EventDetailPage extends StatelessWidget {
 
                   const SizedBox(height: 8),
 
-                  // String interpolation handles DateTime objects smoothly here
                   Align(
                     alignment: Alignment.centerLeft,
                     child: Text("Tanggal : ${event['date']}"),
@@ -158,7 +149,7 @@ class EventDetailPage extends StatelessWidget {
                   Expanded(
                     child: SingleChildScrollView(
                       child: Text(
-                        event['description']?.toString() ?? '',
+                        event['description']!,
                         textAlign: TextAlign.justify,
                         style: const TextStyle(height: 1.6),
                       ),
@@ -171,7 +162,14 @@ class EventDetailPage extends StatelessWidget {
                     width: double.infinity,
                     height: 48,
                     child: ElevatedButton(
-                      onPressed: () {},
+                      onPressed: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => TicketBeliPage(event: event),
+                          ),
+                        );
+                      },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF17C3A5),
                         shape: RoundedRectangleBorder(
