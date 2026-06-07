@@ -1,12 +1,16 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 import 'home_page.dart';
 import 'register_page.dart';
+import '../config/api_config.dart';
 
 class LoginFormPage extends StatefulWidget {
   const LoginFormPage({Key? key}) : super(key: key);
 
   @override
-  State<LoginFormPage> createState() => _LoginFormPageState();
+  _LoginFormPageState createState() => _LoginFormPageState();
 }
 
 class _LoginFormPageState extends State<LoginFormPage> {
@@ -21,10 +25,7 @@ class _LoginFormPageState extends State<LoginFormPage> {
       _isLoading = true;
     });
 
-    // PENTING: Aturan IP Address
-    // Jika pakai Android Emulator, gunakan '10.0.2.2'
-    // Jika pakai HP Fisik, gunakan IP Address laptop Anda (misal: '192.168.1.x')
-    final String url = 'http://192.168.1.40:8000/api/';
+    final String url = ApiConfig.login;
 
     try {
       final response = await http.post(
@@ -90,9 +91,13 @@ class _LoginFormPageState extends State<LoginFormPage> {
         child: CustomScrollView(
           slivers: [
             SliverFillRemaining(
-              hasScrollBody: false, // Penting agar tidak error saat keyboard muncul
+              hasScrollBody:
+                  false, // Penting agar tidak error saat keyboard muncul
               child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 24.0,
+                  vertical: 16.0,
+                ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -103,13 +108,14 @@ class _LoginFormPageState extends State<LoginFormPage> {
                       },
                       child: Row(
                         children: const [
-                          Icon(Icons.arrow_back_ios, color: Colors.blue, size: 20),
+                          Icon(
+                            Icons.arrow_back_ios,
+                            color: Colors.blue,
+                            size: 20,
+                          ),
                           Text(
                             'Back',
-                            style: TextStyle(
-                              color: Colors.blue,
-                              fontSize: 16,
-                            ),
+                            style: TextStyle(color: Colors.blue, fontSize: 16),
                           ),
                         ],
                       ),
@@ -128,29 +134,35 @@ class _LoginFormPageState extends State<LoginFormPage> {
                     const SizedBox(height: 8),
                     const Text(
                       'Silahkan login untuk melanjutkan ke aplikasi.',
-                      style: TextStyle(
-                        fontSize: 14,
-                        color: Colors.grey,
-                      ),
+                      style: TextStyle(fontSize: 14, color: Colors.grey),
                     ),
                     const SizedBox(height: 32),
 
                     // --- 3. Input Username ---
                     TextField(
+                      controller: _usernameController,
                       cursorColor: Colors.blue,
                       decoration: InputDecoration(
                         hintText: 'Username',
                         hintStyle: const TextStyle(color: Colors.grey),
                         filled: true,
                         fillColor: Colors.grey.shade100,
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 16,
+                        ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: Colors.transparent),
+                          borderSide: const BorderSide(
+                            color: Colors.transparent,
+                          ),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: Colors.blue, width: 1.5),
+                          borderSide: const BorderSide(
+                            color: Colors.blue,
+                            width: 1.5,
+                          ),
                         ),
                       ),
                     ),
@@ -158,6 +170,7 @@ class _LoginFormPageState extends State<LoginFormPage> {
 
                     // --- 4. Input Password dengan Ikon Mata ---
                     TextField(
+                      controller: _passwordController,
                       obscureText: _isObscure, // Dikontrol oleh state
                       cursorColor: Colors.blue,
                       decoration: InputDecoration(
@@ -165,27 +178,37 @@ class _LoginFormPageState extends State<LoginFormPage> {
                         hintStyle: const TextStyle(color: Colors.grey),
                         filled: true,
                         fillColor: Colors.grey.shade100,
-                        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 16,
+                          vertical: 16,
+                        ),
                         // Menambahkan ikon di sebelah kanan form
                         suffixIcon: IconButton(
                           icon: Icon(
-                            _isObscure ? Icons.visibility_off : Icons.visibility,
+                            _isObscure
+                                ? Icons.visibility_off
+                                : Icons.visibility,
                             color: Colors.grey,
                           ),
                           onPressed: () {
                             // Mengubah state saat ikon mata ditekan
                             setState(() {
-                              _isObscure = !_isObscure; 
+                              _isObscure = !_isObscure;
                             });
                           },
                         ),
                         enabledBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: Colors.transparent),
+                          borderSide: const BorderSide(
+                            color: Colors.transparent,
+                          ),
                         ),
                         focusedBorder: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(12),
-                          borderSide: const BorderSide(color: Colors.blue, width: 1.5),
+                          borderSide: const BorderSide(
+                            color: Colors.blue,
+                            width: 1.5,
+                          ),
                         ),
                       ),
                     ),
@@ -248,34 +271,37 @@ class _LoginFormPageState extends State<LoginFormPage> {
                     SizedBox(
                       width: double.infinity,
                       height: 52,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          Navigator.pushReplacement(
-                            context, 
-                            MaterialPageRoute(
-                              builder: (context) => const HomePage(),
+                      child:
+                          _isLoading // Cek status loading
+                          ? const Center(
+                              child: CircularProgressIndicator(
+                                color: Color(0xFF1E4E42),
+                              ),
+                            )
+                          : ElevatedButton(
+                              onPressed: () {
+                                // Panggil fungsi loginKeApi() di sini
+                                loginKeApi();
+                              },
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: primaryGreen,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                elevation: 0,
+                              ),
+                              child: const Text(
+                                'Continue',
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
                             ),
-                          );
-                        },
-                        style: ElevatedButton.styleFrom(
-                          backgroundColor: primaryGreen,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          elevation: 0,
-                        ),
-                        child: const Text(
-                          'Continue',
-                          style: TextStyle(
-                            fontSize: 16,
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ),
                     ),
-                    
-                    const SizedBox(height: 16), 
+
+                    const SizedBox(height: 16),
                   ],
                 ),
               ),
