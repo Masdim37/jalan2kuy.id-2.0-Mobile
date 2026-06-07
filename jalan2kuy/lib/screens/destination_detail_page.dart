@@ -7,14 +7,14 @@ import 'profile_page.dart';
 class DestinationDetailPage extends StatelessWidget {
   final String destinationId;
   final String destinationName;
-  final String destinationImage;
+  // final String destinationImage;
   final String destinationThumbnail;
 
   const DestinationDetailPage({
     Key? key,
     required this.destinationId,
     required this.destinationName,
-    required this.destinationImage,
+    // required this.destinationImage,
     required this.destinationThumbnail,
   }) : super(key: key);
 

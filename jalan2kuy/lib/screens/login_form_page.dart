@@ -4,6 +4,7 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'home_page.dart';
 import 'register_page.dart';
+import '../config/api_config.dart';
 
 class LoginFormPage extends StatefulWidget {
   const LoginFormPage({Key? key}) : super(key: key);
@@ -24,10 +25,7 @@ class _LoginFormPageState extends State<LoginFormPage> {
       _isLoading = true;
     });
 
-    // PENTING: Aturan IP Address
-    // Jika pakai Android Emulator, gunakan '10.0.2.2'
-    // Jika pakai HP Fisik, gunakan IP Address laptop Anda (misal: '192.168.1.x')
-    final String url = 'http://192.168.1.40:8000/api/';
+    final String url = ApiConfig.login;
 
     try {
       final response = await http.post(

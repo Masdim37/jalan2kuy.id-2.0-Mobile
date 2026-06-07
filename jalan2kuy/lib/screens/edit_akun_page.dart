@@ -1,4 +1,8 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import '../config/api_config.dart'; // Pastikan path ini benar
 import '../widgets/bottom_nav_bar.dart';
 import 'home_page.dart';
 import 'explore_page.dart';
@@ -13,7 +17,7 @@ class EditAccountPage extends StatefulWidget {
 class _EditAccountPageState extends State<EditAccountPage> {
   // Warna hijau gelap
   final Color primaryGreen = const Color(0xFF1B5E5E);
-  
+
   // Controller untuk TextField
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _emailController = TextEditingController();
@@ -22,12 +26,19 @@ class _EditAccountPageState extends State<EditAccountPage> {
   final TextEditingController _passwordController = TextEditingController();
   final TextEditingController _birthDateController = TextEditingController();
 
-  // State untuk show/hide password
   bool _isObscurePassword = true;
-  
+  bool _isFetching = true;
+  bool _isSaving = false;
+
   // Dropdown value
   String? _selectedGender;
   final List<String> _genderOptions = ['Laki-laki', 'Perempuan'];
+
+  @override
+  void initState() {
+    super.initState();
+    _fetchCurrentUserData(); // Ambil data saat halaman pertama kali dimuat
+  }
 
   @override
   void dispose() {
@@ -38,6 +49,143 @@ class _EditAccountPageState extends State<EditAccountPage> {
     _passwordController.dispose();
     _birthDateController.dispose();
     super.dispose();
+  }
+
+  Future<void> _fetchCurrentUserData() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('token');
+
+    if (token == null) return;
+
+    try {
+      final response = await http.get(
+        Uri.parse(ApiConfig.account),
+        headers: {
+          'Accept': 'application/json',
+          'Authorization': 'Bearer $token',
+          'Connection': 'keep-alive',
+        },
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body)['data'];
+        setState(() {
+          _nameController.text = data['nameUser']?.toString() ?? '';
+          _emailController.text = data['email']?.toString() ?? '';
+          _usernameController.text = data['username']?.toString() ?? '';
+
+          // Sesuaikan 'phone' dengan field di database (misal 'notelp')
+          _phoneController.text =
+              data['phone']?.toString() ?? data['notelp']?.toString() ?? '';
+
+          // Mengatur Dropdown Gender (Asumsi 1/true = Laki-laki, 0/false = Perempuan)
+          if (data['gender'] == 1 ||
+              data['gender'] == true ||
+              data['gender'] == '1') {
+            _selectedGender = 'Laki-laki';
+          } else if (data['gender'] == 0 ||
+              data['gender'] == false ||
+              data['gender'] == '0') {
+            _selectedGender = 'Perempuan';
+          }
+
+          // Mengatur Tanggal Lahir (Dari YYYY-MM-DD ke DD/MM/YYYY)
+          if (data['birthDate'] != null) {
+            String dbDate = data['birthDate'].toString().substring(0, 10);
+            List<String> parts = dbDate.split('-');
+            if (parts.length == 3) {
+              _birthDateController.text = "${parts[2]}/${parts[1]}/${parts[0]}";
+            }
+          }
+          _isFetching = false;
+        });
+      }
+    } catch (e) {
+      setState(() => _isFetching = false);
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Gagal memuat data profil')),
+        );
+      }
+    }
+  }
+
+  // --- 2. FUNGSI MENYIMPAN PERUBAHAN KE API ---
+  Future<void> _saveProfileChanges() async {
+    setState(() => _isSaving = true);
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('token');
+
+    // Ubah format tanggal dari DD/MM/YYYY (UI) kembali ke YYYY-MM-DD (Laravel)
+    String formattedDate = '';
+    if (_birthDateController.text.isNotEmpty) {
+      List<String> parts = _birthDateController.text.split('/');
+      if (parts.length == 3)
+        formattedDate = "${parts[2]}-${parts[1]}-${parts[0]}";
+    }
+
+    // Ubah teks gender kembali ke format yang diterima Laravel (misal 1 dan 0)
+    String genderVal = _selectedGender == 'Laki-laki' ? '1' : '0';
+
+    // Siapkan body request
+    Map<String, dynamic> bodyData = {
+      'nameUser': _nameController.text,
+      'email': _emailController.text,
+      'username': _usernameController.text,
+      'phone': _phoneController.text,
+      'gender': genderVal,
+      'birthDate': formattedDate,
+    };
+
+    // Jika password diisi, tambahkan ke request. Jika tidak, abaikan agar tidak menimpa dengan string kosong.
+    if (_passwordController.text.isNotEmpty) {
+      bodyData['password'] = _passwordController.text;
+    }
+
+    try {
+      final response = await http.post(
+        Uri.parse(ApiConfig.editAccount),
+        headers: {
+          'Authorization': 'Bearer $token',
+          'Accept': 'application/json',
+          'Content-Type': 'application/json',
+          'Connection': 'keep-alive',
+        },
+        body: jsonEncode(bodyData),
+      );
+
+      final responseData = jsonDecode(response.body);
+
+      if (response.statusCode == 200) {
+        if (context.mounted) {
+          Navigator.pop(context, true);
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Profil berhasil diperbarui')),
+          );
+          // Kembali ke halaman sebelumnya dan kirim sinyal 'true' agar ProfilePage tahu harus refresh data
+          Navigator.pop(context, true);
+        }
+      } else {
+        // Tampilkan pesan error validasi dari Laravel
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                responseData['message'] ?? 'Gagal menyimpan perubahan',
+              ),
+            ),
+          );
+        }
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Terjadi kesalahan jaringan')),
+        );
+      }
+    } finally {
+      setState(() => _isSaving = false);
+    }
   }
 
   // Fungsi untuk menampilkan date picker dengan tema hijau
@@ -73,7 +221,7 @@ class _EditAccountPageState extends State<EditAccountPage> {
       },
       initialDatePickerMode: DatePickerMode.day,
     );
-    
+
     if (picked != null) {
       setState(() {
         String day = picked.day.toString().padLeft(2, '0');
@@ -93,10 +241,13 @@ class _EditAccountPageState extends State<EditAccountPage> {
           // Header Hijau Tua
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.only(top: 50, bottom: 30, left: 20, right: 20),
-            decoration: const BoxDecoration(
-              color: Color(0xFF1B5E5E),
+            padding: const EdgeInsets.only(
+              top: 50,
+              bottom: 30,
+              left: 20,
+              right: 20,
             ),
+            decoration: const BoxDecoration(color: Color(0xFF1B5E5E)),
             child: Column(
               children: [
                 Row(
@@ -145,57 +296,73 @@ class _EditAccountPageState extends State<EditAccountPage> {
 
           // Konten Form
           Expanded(
-            child: SingleChildScrollView(
-              padding: const EdgeInsets.symmetric(horizontal: 30, vertical: 20),
-              child: Column(
-                children: [
-                  _buildEditableField('Nama Lengkap', _nameController),
-                  const SizedBox(height: 12),
-                  _buildEditableField('Email', _emailController),
-                  const SizedBox(height: 12),
-                  _buildEditableField('Username', _usernameController),
-                  const SizedBox(height: 12),
-                  _buildPasswordField(),
-                  const SizedBox(height: 12),
-                  _buildDropdownField(),
-                  const SizedBox(height: 12),
-                  _buildEditableField('Masukkan nomor HP', _phoneController, keyboardType: TextInputType.phone),
-                  const SizedBox(height: 12),
-                  _buildDatePickerField(),
-                  const SizedBox(height: 25),
+            child: _isFetching
+                ? const Center(
+                    child: CircularProgressIndicator(color: Color(0xFF1B5E5E)),
+                  )
+                : SingleChildScrollView(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 30,
+                      vertical: 20,
+                    ),
+                    child: Column(
+                      children: [
+                        _buildEditableField('Nama Lengkap', _nameController),
+                        const SizedBox(height: 12),
+                        _buildEditableField(
+                          'Email',
+                          _emailController,
+                          keyboardType: TextInputType.emailAddress,
+                        ),
+                        const SizedBox(height: 12),
+                        _buildEditableField('Username', _usernameController),
+                        const SizedBox(height: 12),
+                        _buildPasswordField(),
+                        const SizedBox(height: 12),
+                        _buildDropdownField(),
+                        const SizedBox(height: 12),
+                        _buildEditableField(
+                          'Masukkan nomor HP',
+                          _phoneController,
+                          keyboardType: TextInputType.phone,
+                        ),
+                        const SizedBox(height: 12),
+                        _buildDatePickerField(),
+                        const SizedBox(height: 25),
 
-                  // Tombol Save Change
-                  SizedBox(
-                    width: double.infinity,
-                    height: 50,
-                    child: ElevatedButton(
-                      onPressed: () {
-                        // Langsung pop halaman dan tampilkan snackbar tanpa popup
-                        Navigator.pop(context);
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Perubahan berhasil disimpan')),
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF2E8B8B),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(25),
+                        // Tombol Save Change
+                        SizedBox(
+                          width: double.infinity,
+                          height: 50,
+                          child: _isSaving
+                              ? const Center(
+                                  child: CircularProgressIndicator(
+                                    color: Color(0xFF1B5E5E),
+                                  ),
+                                )
+                              : ElevatedButton(
+                                  onPressed:
+                                      _saveProfileChanges, // Panggil fungsi API POST
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: const Color(0xFF2E8B8B),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(25),
+                                    ),
+                                  ),
+                                  child: const Text(
+                                    'Save Change',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontSize: 16,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
                         ),
-                      ),
-                      child: const Text(
-                        'Save Change',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
+                        const SizedBox(height: 20),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 20),
-                ],
-              ),
-            ),
           ),
         ],
       ),
@@ -233,7 +400,11 @@ class _EditAccountPageState extends State<EditAccountPage> {
   }
 
   // Widget untuk Form Field yang bisa di-edit (TextField)
-  Widget _buildEditableField(String label, TextEditingController controller, {TextInputType? keyboardType}) {
+  Widget _buildEditableField(
+    String label,
+    TextEditingController controller, {
+    TextInputType? keyboardType,
+  }) {
     return Container(
       width: double.infinity,
       height: 50,
@@ -245,18 +416,15 @@ class _EditAccountPageState extends State<EditAccountPage> {
         controller: controller,
         keyboardType: keyboardType,
         cursorColor: const Color(0xFF1B5E5E),
-        style: const TextStyle(
-          color: Colors.black87,
-          fontSize: 14,
-        ),
+        style: const TextStyle(color: Colors.black87, fontSize: 14),
         decoration: InputDecoration(
           hintText: label,
-          hintStyle: const TextStyle(
-            color: Colors.grey,
-            fontSize: 14,
-          ),
+          hintStyle: const TextStyle(color: Colors.grey, fontSize: 14),
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 16,
+          ),
         ),
       ),
     );
@@ -275,18 +443,15 @@ class _EditAccountPageState extends State<EditAccountPage> {
         controller: _passwordController,
         obscureText: _isObscurePassword,
         cursorColor: const Color(0xFF1B5E5E),
-        style: const TextStyle(
-          color: Colors.black87,
-          fontSize: 14,
-        ),
+        style: const TextStyle(color: Colors.black87, fontSize: 14),
         decoration: InputDecoration(
-          hintText: 'Password',
-          hintStyle: const TextStyle(
-            color: Colors.grey,
-            fontSize: 14,
-          ),
+          hintText: 'Password (Isi hanya jika ingin mengganti password)',
+          hintStyle: const TextStyle(color: Colors.grey, fontSize: 14),
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 16,
+          ),
           suffixIcon: IconButton(
             icon: Icon(
               _isObscurePassword ? Icons.visibility_off : Icons.visibility,
@@ -321,10 +486,7 @@ class _EditAccountPageState extends State<EditAccountPage> {
             padding: EdgeInsets.only(left: 16),
             child: Text(
               'Pilih jenis kelamin',
-              style: TextStyle(
-                color: Colors.grey,
-                fontSize: 14,
-              ),
+              style: TextStyle(color: Colors.grey, fontSize: 14),
             ),
           ),
           isExpanded: true,
@@ -341,10 +503,7 @@ class _EditAccountPageState extends State<EditAccountPage> {
               value: value,
               child: Text(
                 value,
-                style: const TextStyle(
-                  color: Colors.black87,
-                  fontSize: 14,
-                ),
+                style: const TextStyle(color: Colors.black87, fontSize: 14),
               ),
             );
           }).toList(),
@@ -371,18 +530,15 @@ class _EditAccountPageState extends State<EditAccountPage> {
         controller: _birthDateController,
         readOnly: true,
         cursorColor: const Color(0xFF1B5E5E),
-        style: const TextStyle(
-          color: Colors.black87,
-          fontSize: 14,
-        ),
+        style: const TextStyle(color: Colors.black87, fontSize: 14),
         decoration: InputDecoration(
           hintText: 'dd/mm/yyyy',
-          hintStyle: const TextStyle(
-            color: Colors.grey,
-            fontSize: 14,
-          ),
+          hintStyle: const TextStyle(color: Colors.grey, fontSize: 14),
           border: InputBorder.none,
-          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+          contentPadding: const EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: 16,
+          ),
           suffixIcon: const Icon(
             Icons.calendar_today,
             color: Colors.grey,
