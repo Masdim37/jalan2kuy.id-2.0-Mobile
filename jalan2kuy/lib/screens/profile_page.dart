@@ -521,7 +521,17 @@ class _ProfilePageState extends State<ProfilePage> {
                 Row(
                   children: [
                     IconButton(
-                      onPressed: () => Navigator.pop(context),
+                      onPressed: () {
+                        // Mengarahkan ke HomePage dan menghapus semua history halaman sebelumnya
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const HomePage(),
+                          ),
+                          (route) =>
+                              false, // Menghapus seluruh stack halaman lama
+                        );
+                      },
                       icon: const Icon(Icons.arrow_back, color: Colors.white),
                       padding: EdgeInsets.zero,
                       constraints: const BoxConstraints(),

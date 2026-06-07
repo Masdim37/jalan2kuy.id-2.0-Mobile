@@ -116,23 +116,46 @@ class _GaleriPage extends State<GaleriPage> {
 
               SafeArea(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 20,
-                    vertical: 16,
-                  ),
+                  padding: const EdgeInsets.all(20),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Image.asset('assets/images/logo.png', width: 80),
-
-                      const SizedBox(height: 35),
-
+                      Row(
+                        children: [
+                          IconButton(
+                            onPressed: () {
+                              // Mengarahkan ke HomePage dan menghapus semua history halaman sebelumnya
+                              Navigator.pushAndRemoveUntil(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => const HomePage(),
+                                ),
+                                (route) =>
+                                    false, // Menghapus seluruh stack halaman lama
+                              );
+                            },
+                            icon: const Icon(
+                              Icons.arrow_back,
+                              color: Colors.white,
+                            ),
+                            padding: EdgeInsets.zero,
+                            constraints: const BoxConstraints(),
+                          ),
+                          const SizedBox(width: 12),
+                          Image.asset(
+                            'assets/images/logo.png',
+                            width: 100,
+                            height: 100,
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 20),
                       const Text(
                         'Galleri',
                         style: TextStyle(
                           color: Colors.white,
-                          fontSize: 42,
-                          fontWeight: FontWeight.w300,
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ],
