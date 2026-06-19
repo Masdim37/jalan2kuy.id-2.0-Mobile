@@ -547,11 +547,10 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   void _showDeleteAccountDialog(BuildContext context) {
-    // ... (Kode _showDeleteAccountDialog Anda dibiarkan sama seperti sebelumnya)
     showDialog(
       context: context,
       barrierDismissible: false,
-      builder: (BuildContext context) {
+      builder: (BuildContext dialogContext) {
         return AlertDialog(
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
@@ -575,26 +574,67 @@ class _ProfilePageState extends State<ProfilePage> {
                   Expanded(
                     child: ElevatedButton(
                       onPressed: () async {
-                        // Opsional: Panggil API delete account di sini nantinya
-                        // Bersihkan token
+                        // 1. SIMPAN Navigator & ScaffoldMessenger SEBELUM proses await dimulai.
+                        // Ini akan mencegah error "context tidak valid / unmounted"
+                        final navigator = Navigator.of(context);
+                        final scaffoldMessenger = ScaffoldMessenger.of(context);
+
+                        // 2. Tutup popup dialog konfirmasi "Apakah anda yakin..."
+                        Navigator.pop(dialogContext);
+
+                        // 3. Tampilkan Loading Indicator
+                        showDialog(
+                          context: context,
+                          barrierDismissible: false,
+                          builder: (loadingContext) =>
+                              const Center(child: CircularProgressIndicator()),
+                        );
+
+                        // 4. Ambil Token (Pastikan key-nya benar, misal 'auth_token' atau 'token')
                         SharedPreferences prefs =
                             await SharedPreferences.getInstance();
-                        await prefs.remove('token');
+                        String? token = prefs.getString(
+                          'token',
+                        ); // sesuaikan key
 
-                        if (context.mounted) {
-                          Navigator.pushAndRemoveUntil(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => const WelcomePage(),
-                            ),
-                            (route) => false,
-                          );
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            const SnackBar(
-                              content: Text('Akun berhasil dihapus'),
-                            ),
-                          );
+                        // 5. Panggil API Hapus Akun ke Server
+                        if (token != null) {
+                          try {
+                            await http.post(
+                              Uri.parse(ApiConfig.deleteAccount),
+                              headers: {
+                                'Accept': 'application/json',
+                                'Authorization': 'Bearer $token',
+                              },
+                            );
+                          } catch (e) {
+                            debugPrint('Error delete account API: $e');
+                          }
                         }
+
+                        // 6. Hapus token lokal di memori HP
+                        await prefs.remove('token'); // sesuaikan key
+
+                        // 7. Tutup Loading Indicator menggunakan navigator yang sudah disimpan
+                        navigator.pop();
+
+                        // 8. Tampilkan pesan berhasil (WAJIB SEBELUM PINDAH HALAMAN)
+                        scaffoldMessenger.showSnackBar(
+                          const SnackBar(
+                            content: Text('Akun berhasil dihapus'),
+                            backgroundColor:
+                                Colors.grey, // Opsional: Beri warna hijau
+                          ),
+                        );
+
+                        // 9. Arahkan pengguna ke WelcomePage / LoginPage
+                        navigator.pushAndRemoveUntil(
+                          MaterialPageRoute(
+                            builder: (context) =>
+                                const WelcomePage(), // Sesuaikan halaman tujuan
+                          ),
+                          (route) => false,
+                        );
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFFC5E618),
@@ -617,7 +657,8 @@ class _ProfilePageState extends State<ProfilePage> {
                   const SizedBox(width: 12),
                   Expanded(
                     child: ElevatedButton(
-                      onPressed: () => Navigator.pop(context),
+                      // Menutup dialog pembatalan
+                      onPressed: () => Navigator.pop(dialogContext),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: Colors.red,
                         shape: RoundedRectangleBorder(
