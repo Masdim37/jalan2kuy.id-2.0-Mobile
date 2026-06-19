@@ -372,28 +372,54 @@ class _ProfilePageState extends State<ProfilePage> {
       ),
 
       bottomNavigationBar: CustomBottomNavBar(
+        // UBAH ANGKA INI SESUAI HALAMAN SAAT INI (0 untuk Home, 1 Explore, 2 Ticket, 3 Profile)
         currentIndex: 3,
         onTap: (index) {
+          // 0: HOME
           if (index == 0) {
-            Navigator.pushAndRemoveUntil(
+            Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => const HomePage()),
-              (route) => false,
+              PageRouteBuilder(
+                pageBuilder: (context, animation1, animation2) =>
+                    const HomePage(),
+                transitionDuration: Duration
+                    .zero, // Hilangkan animasi transisi agar seperti ganti tab
+              ),
             );
-          } else if (index == 1) {
-            Navigator.pushAndRemoveUntil(
+          }
+          // 1: EXPLORE
+          else if (index == 1) {
+            Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => const ExplorePage()),
-              (route) => false,
+              PageRouteBuilder(
+                pageBuilder: (context, animation1, animation2) =>
+                    const ExplorePage(),
+                transitionDuration: Duration.zero,
+              ),
             );
-          } else if (index == 2) {
-            Navigator.pushAndRemoveUntil(
+          }
+          // 2: TICKET
+          else if (index == 2) {
+            Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => const MyTicketPage()),
-              (route) => false,
+              PageRouteBuilder(
+                pageBuilder: (context, animation1, animation2) =>
+                    const MyTicketPage(),
+                transitionDuration: Duration.zero,
+              ),
             );
-          } else if (index == 3) {
-            return;
+          }
+          // 3: PROFILE
+          else if (index == 3) {
+            Navigator.pushReplacement(
+              context,
+              PageRouteBuilder(
+                // Catatan: Jika di explore_page Anda meng-alias profile_page, ganti const ProfilePage() menjadi const profile_page.ProfilePage()
+                pageBuilder: (context, animation1, animation2) =>
+                    const ProfilePage(),
+                transitionDuration: Duration.zero,
+              ),
+            );
           }
         },
       ),

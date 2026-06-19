@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import '../config/api_config.dart';
 import '../widgets/bottom_nav_bar.dart';
-import 'MyTicketPage.dart';
+import 'MyTicketPage.dart' as ticket;
 import 'home_page.dart';
-import 'profile_page.dart' as profile_page;
+import 'profile_page.dart';
 import 'category_detail_page.dart';
 import 'destination_detail_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -233,26 +233,78 @@ class _ExplorePageState extends State<ExplorePage> {
           ),
         ],
       ),
+      // bottomNavigationBar: CustomBottomNavBar(
+      //   currentIndex: 1,
+      //   onTap: (index) {
+      //     if (index == 0) {
+      //       Navigator.pushAndRemoveUntil(
+      //         context,
+      //         MaterialPageRoute(builder: (context) => const HomePage()),
+      //         (route) => false,
+      //       );
+      //     } else if (index == 1) {
+      //       Navigator.pushAndRemoveUntil(
+      //         context,
+      //         MaterialPageRoute(builder: (context) => const MyTicketPage()),
+      //         (route) => false,
+      //       );
+      //     } else if (index == 3) {
+      //       Navigator.pushAndRemoveUntil(
+      //         context,
+      //         MaterialPageRoute(builder: (context) => const profile_page.ProfilePage()),
+      //         (route) => false,
+      //       );
+      //     }
+      //   },
+      // ),
       bottomNavigationBar: CustomBottomNavBar(
+        // UBAH ANGKA INI SESUAI HALAMAN SAAT INI (0 untuk Home, 1 Explore, 2 Ticket, 3 Profile)
         currentIndex: 1,
         onTap: (index) {
+          // 0: HOME
           if (index == 0) {
-            Navigator.pushAndRemoveUntil(
+            Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => const HomePage()),
-              (route) => false,
+              PageRouteBuilder(
+                pageBuilder: (context, animation1, animation2) =>
+                    const HomePage(),
+                transitionDuration: Duration
+                    .zero, // Hilangkan animasi transisi agar seperti ganti tab
+              ),
             );
-          } else if (index == 1) {
-            Navigator.pushAndRemoveUntil(
+          }
+          // 1: EXPLORE
+          else if (index == 1) {
+            Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => const MyTicketPage()),
-              (route) => false,
+              PageRouteBuilder(
+                pageBuilder: (context, animation1, animation2) =>
+                    const ExplorePage(),
+                transitionDuration: Duration.zero,
+              ),
             );
-          } else if (index == 3) {
-            Navigator.pushAndRemoveUntil(
+          }
+          // 2: TICKET
+          else if (index == 2) {
+            Navigator.pushReplacement(
               context,
-              MaterialPageRoute(builder: (context) => const profile_page.ProfilePage()),
-              (route) => false,
+              PageRouteBuilder(
+                pageBuilder: (context, animation1, animation2) =>
+                    const MyTicketPage(),
+                transitionDuration: Duration.zero,
+              ),
+            );
+          }
+          // 3: PROFILE
+          else if (index == 3) {
+            Navigator.pushReplacement(
+              context,
+              PageRouteBuilder(
+                // Catatan: Jika di explore_page Anda meng-alias profile_page, ganti const ProfilePage() menjadi const profile_page.ProfilePage()
+                pageBuilder: (context, animation1, animation2) =>
+                    const ProfilePage(),
+                transitionDuration: Duration.zero,
+              ),
             );
           }
         },
