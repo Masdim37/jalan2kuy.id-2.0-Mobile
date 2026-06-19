@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import '../config/api_config.dart';
 
 class RegisterPage extends StatefulWidget {
   const RegisterPage({Key? key}) : super(key: key);
@@ -10,6 +13,13 @@ class RegisterPage extends StatefulWidget {
 class _RegisterPageState extends State<RegisterPage> {
   // Warna hijau gelap dari desain jalan2kuy
   final Color primaryGreen = const Color(0xFF1E4E42);
+  final TextEditingController _nameController = TextEditingController();
+  final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  final TextEditingController _confirmPasswordController =
+      TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
 
   // State untuk mengontrol tampil/sembunyi password & konfirmasi password
   bool _isObscure = true;
@@ -22,6 +32,66 @@ class _RegisterPageState extends State<RegisterPage> {
   // Controller untuk Tanggal Lahir agar bisa diisi oleh DatePicker
   final TextEditingController _dateController = TextEditingController();
 
+  Future<void> _register() async {
+    // Validasi sederhana di frontend
+    if (_passwordController.text != _confirmPasswordController.text) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Password dan Konfirmasi Password tidak cocok!'),
+        ),
+      );
+      return;
+    }
+
+    // Format ulang format tanggal lahir dari dd/mm/yyyy ke yyyy-mm-dd untuk database
+    String dobFormatted = '';
+    if (_dateController.text.isNotEmpty) {
+      List<String> parts = _dateController.text.split('/');
+      if (parts.length == 3) {
+        dobFormatted = "${parts[2]}-${parts[1]}-${parts[0]}";
+      }
+    }
+
+    try {
+      final response = await http.post(
+        Uri.parse(ApiConfig.register),
+        headers: {'Accept': 'application/json'},
+        body: {
+          'nameUser': _nameController.text,
+          'email': _emailController.text,
+          'username': _usernameController.text,
+          'password': _passwordController.text,
+          'gender': _selectedGender ?? '',
+          'phone': _phoneController.text,
+          'birthDate': dobFormatted,
+        },
+      );
+
+      final responseData = json.decode(response.body);
+
+      if (response.statusCode == 201) {
+        // Berhasil
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(responseData['message'] ?? 'Berhasil Daftar!'),
+          ),
+        );
+        Navigator.pop(context); // Kembali ke halaman Login
+      } else {
+        // Gagal (Validasi error dll)
+        String errorMsg =
+            responseData['message'] ?? 'Gagal melakukan registrasi.';
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(errorMsg)));
+      }
+    } catch (e) {
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text('Terjadi kesalahan koneksi.')));
+    }
+  }
+
   // Fungsi untuk memunculkan kalender (Date Picker)
   Future<void> _selectDate(BuildContext context) async {
     final DateTime? picked = await showDatePicker(
@@ -33,9 +103,9 @@ class _RegisterPageState extends State<RegisterPage> {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: ColorScheme.light(
-              primary: primaryGreen, 
-              onPrimary: Colors.white, 
-              onSurface: Colors.black, 
+              primary: primaryGreen,
+              onPrimary: Colors.white,
+              onSurface: Colors.black,
             ),
           ),
           child: child!,
@@ -90,15 +160,24 @@ class _RegisterPageState extends State<RegisterPage> {
                         children: [
                           GestureDetector(
                             onTap: () {
-                              Navigator.pop(context); // Kembali ke halaman login
+                              Navigator.pop(
+                                context,
+                              ); // Kembali ke halaman login
                             },
                             child: Row(
                               children: const [
-                                Icon(Icons.arrow_back_ios, color: Colors.white, size: 18),
+                                Icon(
+                                  Icons.arrow_back_ios,
+                                  color: Colors.white,
+                                  size: 18,
+                                ),
                                 SizedBox(width: 4),
                                 Text(
                                   'Back',
-                                  style: TextStyle(color: Colors.white, fontSize: 16),
+                                  style: TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 16,
+                                  ),
                                 ),
                               ],
                             ),
@@ -123,7 +202,10 @@ class _RegisterPageState extends State<RegisterPage> {
 
             // --- 2. Konten Form ---
             Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 24.0),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 24.0,
+                vertical: 24.0,
+              ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -140,23 +222,31 @@ class _RegisterPageState extends State<RegisterPage> {
                   const SizedBox(height: 32),
 
                   // Form 1: Nama Lengkap
-                  _buildTextField(hint: 'Nama Lengkap'),
+                  _buildTextField(
+                    hint: 'Nama Lengkap',
+                    controller: _nameController,
+                  ),
                   const SizedBox(height: 16),
 
                   // Form 2: Email
                   _buildTextField(
                     hint: 'Email',
+                    controller: _emailController,
                     keyboardType: TextInputType.emailAddress,
                   ),
                   const SizedBox(height: 16),
 
                   // Form 3: Username
-                  _buildTextField(hint: 'Username'),
+                  _buildTextField(
+                    hint: 'Username',
+                    controller: _usernameController,
+                  ),
                   const SizedBox(height: 16),
 
                   // Form 4: Password
                   _buildPasswordField(
                     hint: 'Password',
+                    controller: _passwordController,
                     isObscure: _isObscure,
                     onTapIcon: () {
                       setState(() {
@@ -169,25 +259,40 @@ class _RegisterPageState extends State<RegisterPage> {
                   // Form 5: Pilih jenis kelamin (Dropdown)
                   DropdownButtonFormField<String>(
                     value: _selectedGender,
-                    hint: const Text('Pilih jenis kelamin', style: TextStyle(color: Colors.grey, fontSize: 14)),
-                    icon: const Icon(Icons.keyboard_arrow_down, color: Colors.grey),
+                    hint: const Text(
+                      'Pilih jenis kelamin',
+                      style: TextStyle(color: Colors.grey, fontSize: 14),
+                    ),
+                    icon: const Icon(
+                      Icons.keyboard_arrow_down,
+                      color: Colors.grey,
+                    ),
                     decoration: InputDecoration(
                       filled: true,
                       fillColor: Colors.grey.shade100,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 16,
+                      ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: const BorderSide(color: Colors.transparent),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Colors.blue, width: 1.5),
+                        borderSide: const BorderSide(
+                          color: Colors.blue,
+                          width: 1.5,
+                        ),
                       ),
                     ),
                     items: _genderOptions.map((String value) {
                       return DropdownMenuItem<String>(
                         value: value,
-                        child: Text(value, style: const TextStyle(color: Colors.black)),
+                        child: Text(
+                          value,
+                          style: const TextStyle(color: Colors.black),
+                        ),
                       );
                     }).toList(),
                     onChanged: (newValue) {
@@ -201,6 +306,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   // Form 6: Masukkan nomor HP
                   _buildTextField(
                     hint: 'Masukkan nomor HP',
+                    controller: _phoneController,
                     keyboardType: TextInputType.phone,
                   ),
                   const SizedBox(height: 16),
@@ -208,24 +314,37 @@ class _RegisterPageState extends State<RegisterPage> {
                   // Form 7: Tanggal Lahir (Date Picker)
                   TextFormField(
                     controller: _dateController,
-                    readOnly: true, 
+                    readOnly: true,
                     onTap: () => _selectDate(context),
                     cursorColor: Colors.blue,
                     style: const TextStyle(color: Colors.black),
                     decoration: InputDecoration(
                       hintText: 'dd/mm/yyyy',
-                      hintStyle: const TextStyle(color: Colors.grey, fontSize: 14),
+                      hintStyle: const TextStyle(
+                        color: Colors.grey,
+                        fontSize: 14,
+                      ),
                       filled: true,
                       fillColor: Colors.grey.shade100,
-                      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
-                      suffixIcon: const Icon(Icons.calendar_today, color: Colors.grey, size: 20),
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 16,
+                      ),
+                      suffixIcon: const Icon(
+                        Icons.calendar_today,
+                        color: Colors.grey,
+                        size: 20,
+                      ),
                       enabledBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                         borderSide: const BorderSide(color: Colors.transparent),
                       ),
                       focusedBorder: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
-                        borderSide: const BorderSide(color: Colors.blue, width: 1.5),
+                        borderSide: const BorderSide(
+                          color: Colors.blue,
+                          width: 1.5,
+                        ),
                       ),
                     ),
                   ),
@@ -234,6 +353,7 @@ class _RegisterPageState extends State<RegisterPage> {
                   // Form 8: Konfirmasi Password
                   _buildPasswordField(
                     hint: 'Konfirmasi password',
+                    controller: _confirmPasswordController,
                     isObscure: _isObscureConfirm,
                     onTapIcon: () {
                       setState(() {
@@ -241,7 +361,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       });
                     },
                   ),
-                  
+
                   const SizedBox(height: 40),
 
                   // --- Tombol Daftar (Kembali ke Halaman Login) ---
@@ -250,8 +370,7 @@ class _RegisterPageState extends State<RegisterPage> {
                     height: 52,
                     child: ElevatedButton(
                       onPressed: () {
-                        // Menutup halaman register dan langsung kembali ke login_page.dart
-                        Navigator.pop(context); 
+                        _register();
                       },
                       style: ElevatedButton.styleFrom(
                         backgroundColor: primaryGreen,
@@ -270,9 +389,9 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                     ),
                   ),
-                  
+
                   const SizedBox(height: 24),
-                  
+
                   // Teks Log In di bawah tombol
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -283,7 +402,7 @@ class _RegisterPageState extends State<RegisterPage> {
                       ),
                       GestureDetector(
                         onTap: () {
-                          Navigator.pop(context); 
+                          Navigator.pop(context);
                         },
                         child: const Text(
                           'Login di sini',
@@ -307,8 +426,13 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   // Widget Bantuan TextField Biasa
-  Widget _buildTextField({required String hint, TextInputType keyboardType = TextInputType.text}) {
+  Widget _buildTextField({
+    required String hint,
+    required TextEditingController controller,
+    TextInputType keyboardType = TextInputType.text,
+  }) {
     return TextField(
+      controller: controller,
       cursorColor: Colors.blue,
       keyboardType: keyboardType,
       style: const TextStyle(color: Colors.black),
@@ -317,7 +441,10 @@ class _RegisterPageState extends State<RegisterPage> {
         hintStyle: const TextStyle(color: Colors.grey, fontSize: 14),
         filled: true,
         fillColor: Colors.grey.shade100,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 16,
+        ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
           borderSide: const BorderSide(color: Colors.transparent),
@@ -331,8 +458,14 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   // Widget Bantuan TextField Password
-  Widget _buildPasswordField({required String hint, required bool isObscure, required VoidCallback onTapIcon}) {
+  Widget _buildPasswordField({
+    required String hint,
+    required TextEditingController controller,
+    required bool isObscure,
+    required VoidCallback onTapIcon,
+  }) {
     return TextField(
+      controller: controller,
       obscureText: isObscure,
       cursorColor: Colors.blue,
       style: const TextStyle(color: Colors.black),
@@ -341,7 +474,10 @@ class _RegisterPageState extends State<RegisterPage> {
         hintStyle: const TextStyle(color: Colors.grey, fontSize: 14),
         filled: true,
         fillColor: Colors.grey.shade100,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 16,
+        ),
         suffixIcon: IconButton(
           icon: Icon(
             isObscure ? Icons.visibility_off : Icons.visibility,
