@@ -3,8 +3,9 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import '../config/api_config.dart';
 import '../widgets/bottom_nav_bar.dart';
+import 'MyTicketPage.dart';
 import 'home_page.dart';
-import 'profile_page.dart';
+import 'profile_page.dart' as profile_page;
 import 'category_detail_page.dart';
 import 'destination_detail_page.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -242,11 +243,15 @@ class _ExplorePageState extends State<ExplorePage> {
               (route) => false,
             );
           } else if (index == 1) {
-            return;
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => const MyTicketPage()),
+              (route) => false,
+            );
           } else if (index == 3) {
             Navigator.pushAndRemoveUntil(
               context,
-              MaterialPageRoute(builder: (context) => const ProfilePage()),
+              MaterialPageRoute(builder: (context) => const profile_page.ProfilePage()),
               (route) => false,
             );
           }

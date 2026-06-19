@@ -5,6 +5,7 @@ import '../widgets/bottom_nav_bar.dart';
 import 'explore_page.dart';
 import 'profile_page.dart';
 import 'galeri_page.dart';
+import 'MyTicketPage.dart' as ticket;
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);
@@ -223,8 +224,9 @@ class _HomePageState extends State<HomePage> {
             );
           } else if (index == 2) {
             // Ticket page belum ada
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Halaman Ticket segera hadir!')),
+            Navigator.pushReplacement(
+              context,
+              MaterialPageRoute(builder: (context) => const MyTicketPage()),
             );
           } else if (index == 3) {
             // Navigate ke Profile (pakai push agar bisa kembali dengan tombol back)

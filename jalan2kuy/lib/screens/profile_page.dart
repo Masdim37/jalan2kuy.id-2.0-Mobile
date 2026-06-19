@@ -17,6 +17,22 @@ class ProfilePage extends StatefulWidget {
   State<ProfilePage> createState() => _ProfilePageState();
 }
 
+// Placeholder MyTicketPage since original class was not found.
+class MyTicketPage extends StatelessWidget {
+  const MyTicketPage({Key? key}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('My Tickets'),
+        backgroundColor: const Color(0xFF1B5E5E),
+      ),
+      body: const Center(child: Text('My Tickets Page')),
+    );
+  }
+}
+
 class _ProfilePageState extends State<ProfilePage> {
   Map<String, dynamic>? userData;
   bool isLoading = true;
@@ -371,11 +387,14 @@ class _ProfilePageState extends State<ProfilePage> {
               (route) => false,
             );
           } else if (index == 2) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Halaman Ticket segera hadir!')),
+            Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => const MyTicketPage()),
+              (route) => false,
             );
-          } else if (index == 3)
+          } else if (index == 3) {
             return;
+          }
         },
       ),
     );

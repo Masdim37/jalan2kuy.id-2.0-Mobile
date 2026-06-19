@@ -416,6 +416,11 @@ class _EventPageState extends State<EventPage> {
           } else if (index == 3) {
             Navigator.push(
               context,
+              MaterialPageRoute(builder: (_) => const MyTicketPage()),
+            );
+          } else if (index == 4) {
+            Navigator.push(
+              context,
               MaterialPageRoute(builder: (_) => const ProfilePage()),
             );
           }

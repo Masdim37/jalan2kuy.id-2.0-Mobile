@@ -20,6 +20,7 @@ class ApiConfig {
   static const String event = '$_baseUrl/api/event';
   static const String eventDetail = '$_baseUrl/api/event/detail';
   static const String eventBeliTiket = '$_baseUrl/api/event/checkout';
+  static const String MyTicket = '$_baseUrl/api/MyTicket';
 
   // Anda bisa menambahkan endpoint lain di sini nanti, misal:
   // static const String register = '$_baseUrl/api/register';
