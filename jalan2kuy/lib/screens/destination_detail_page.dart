@@ -7,6 +7,7 @@ import '../widgets/bottom_nav_bar.dart';
 import 'home_page.dart';
 import 'explore_page.dart';
 import 'profile_page.dart';
+import 'MyTicketPage.dart';
 
 class DestinationDetailPage extends StatefulWidget {
   final String destinationID;

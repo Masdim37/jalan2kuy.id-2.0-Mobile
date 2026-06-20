@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import '../config/api_config.dart';
 import '../widgets/bottom_nav_bar.dart';
-import 'MyTicketPage.dart' as ticket;
+import 'MyTicketPage.dart';
 import 'home_page.dart';
 import 'profile_page.dart';
 import 'category_detail_page.dart';

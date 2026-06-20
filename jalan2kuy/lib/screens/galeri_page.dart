@@ -9,6 +9,7 @@ import 'explore_page.dart';
 import 'home_page.dart';
 import 'event_page.dart';
 import 'profile_page.dart';
+import 'MyTicketPage.dart';
 
 class GaleriPage extends StatefulWidget {
   const GaleriPage({super.key});

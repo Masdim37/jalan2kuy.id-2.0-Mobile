@@ -8,6 +8,7 @@ import 'home_page.dart';
 import 'explore_page.dart';
 import 'profile_page.dart';
 import 'destination_detail_page.dart';
+import 'MyTicketPage.dart';
 
 // UBAH MENJADI STATEFUL WIDGET AGAR BISA MEMANGGIL API
 class CategoryDetailPage extends StatefulWidget {

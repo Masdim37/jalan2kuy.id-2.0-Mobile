@@ -5,7 +5,7 @@ import '../widgets/bottom_nav_bar.dart';
 import 'explore_page.dart';
 import 'profile_page.dart';
 import 'galeri_page.dart';
-import 'MyTicketPage.dart' as ticket;
+import 'MyTicketPage.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({Key? key}) : super(key: key);

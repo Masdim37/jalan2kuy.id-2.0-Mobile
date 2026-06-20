@@ -10,6 +10,7 @@ import 'home_page.dart';
 import 'event_page.dart';
 import 'profile_page.dart';
 import 'ticket_beli_page.dart';
+import 'MyTicketPage.dart';
 
 class EventDetailPage extends StatefulWidget {
   final String eventID;
@@ -280,10 +281,10 @@ class _EventDetailPage extends State<EventDetailPage> {
               MaterialPageRoute(builder: (_) => const HomePage()),
               (route) => false,
             );
-          } else if (index == 1) {
+          } else if (index == 2) {
             Navigator.pushAndRemoveUntil(
               context,
-              MaterialPageRoute(builder: (_) => const EventPage()),
+              MaterialPageRoute(builder: (_) => const MyTicketPage()),
               (route) => false,
             );
           } else if (index == 3) {

@@ -8,6 +8,7 @@ import 'home_page.dart';
 import 'profile_page.dart';
 import 'event_detail_page.dart';
 import 'event_page.dart';
+import 'MyTicketPage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class EventPage extends StatefulWidget {
@@ -413,12 +414,12 @@ class _EventPageState extends State<EventPage> {
               context,
               MaterialPageRoute(builder: (_) => const HomePage()),
             );
-          } else if (index == 3) {
+          } else if (index == 2) {
             Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => const MyTicketPage()),
             );
-          } else if (index == 4) {
+          } else if (index == 3) {
             Navigator.push(
               context,
               MaterialPageRoute(builder: (_) => const ProfilePage()),

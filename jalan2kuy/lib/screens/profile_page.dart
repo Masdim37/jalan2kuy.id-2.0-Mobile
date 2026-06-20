@@ -9,6 +9,7 @@ import 'edit_akun_page.dart';
 import 'welcome_page.dart';
 import '../config/api_config.dart';
 import 'login_page.dart';
+import 'MyTicketPage.dart';
 
 class ProfilePage extends StatefulWidget {
   const ProfilePage({Key? key}) : super(key: key);
@@ -18,20 +19,20 @@ class ProfilePage extends StatefulWidget {
 }
 
 // Placeholder MyTicketPage since original class was not found.
-class MyTicketPage extends StatelessWidget {
-  const MyTicketPage({Key? key}) : super(key: key);
+// class MyTicketPage extends StatelessWidget {
+//   const MyTicketPage({Key? key}) : super(key: key);
 
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('My Tickets'),
-        backgroundColor: const Color(0xFF1B5E5E),
-      ),
-      body: const Center(child: Text('My Tickets Page')),
-    );
-  }
-}
+//   @override
+//   Widget build(BuildContext context) {
+//     return Scaffold(
+//       appBar: AppBar(
+//         title: const Text('My Tickets'),
+//         backgroundColor: const Color(0xFF1B5E5E),
+//       ),
+//       body: const Center(child: Text('My Tickets Page')),
+//     );
+//   }
+// }
 
 class _ProfilePageState extends State<ProfilePage> {
   Map<String, dynamic>? userData;
