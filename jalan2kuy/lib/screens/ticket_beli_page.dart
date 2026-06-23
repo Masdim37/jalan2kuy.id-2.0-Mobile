@@ -1,70 +1,52 @@
 import 'dart:convert';
-import 'package:http/http.dart' as http;
-import '../config/api_config.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 import 'package:flutter/material.dart';
-import 'success_page.dart';
+import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
+import '../config/api_config.dart';
+import 'payment_webview.dart';
+import 'MyTicketPage.dart';
 
 class TicketBeliPage extends StatefulWidget {
   final String eventID;
   const TicketBeliPage({Key? key, required this.eventID}) : super(key: key);
 
   @override
-  State<TicketBeliPage> createState() => _TicketBeliPage();
+  State<TicketBeliPage> createState() => _TicketBeliPageState();
 }
 
-class _TicketBeliPage extends State<TicketBeliPage> {
-  Map<String, dynamic>? eventBeliDetail;
-  bool isLoading = true;
+class _TicketBeliPageState extends State<TicketBeliPage> {
+  int qty = 1;
+  bool isLoading = false;
 
-  @override
-  void initState() {
-    super.initState();
-    fetchEventBeliDetail();
-  }
-
-  Future<void> fetchEventBeliDetail() async {
+  Future<void> checkout() async {
     setState(() => isLoading = true);
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    String? token = prefs.getString('token');
 
     try {
-      String url = '${ApiConfig.eventBeliTiket}?eventID=${widget.eventID}';
-
-      print("🌍 MENGHUBUNGI URL: $url");
-
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      String? token = prefs.getString('token');
-
-      final response = await http.get(
-        Uri.parse(url),
-        headers: {
-          'Accept': 'application/json',
-          'Authorization': 'Bearer $token',
-          'Connection': 'keep-alive',
-        },
+      final response = await http.post(
+        Uri.parse('${ApiConfig.eventBeliTiket}/${widget.eventID}'),
+        headers: {'Accept': 'application/json', 'Authorization': 'Bearer $token'},
+        body: {'qty': qty.toString()},
       );
 
-      // CCTV 2: Lihat status balasan dari Laravel
-      print("🚀 STATUS CODE: ${response.statusCode}");
-      // CCTV 3: Lihat isi JSON yang ditangkap Flutter
-      print("📦 ISI RESPONSE: ${response.body}");
+      final data = jsonDecode(response.body);
 
-      if (response.statusCode == 200) {
-        final responseData = jsonDecode(response.body);
-
-        // CCTV 4: Pastikan status success-nya true
-        print("✅ SUCCESS STATUS: ${responseData['success']}");
-
-        setState(() {
-          eventBeliDetail = responseData['data'];
-          isLoading = false;
-        });
+      if (response.statusCode == 200 && data['success']) {
+        // Buka Midtrans WebView
+        bool? isSuccess = await Navigator.push(
+          context,
+          MaterialPageRoute(builder: (_) => PaymentWebview(url: data['redirect_url'])),
+        );
+        // Arahkan ke MyTicket apapun hasilnya (karena callback Laravel akan memproses statusnya di background)
+        Navigator.pushAndRemoveUntil(
+            context, MaterialPageRoute(builder: (_) => const MyTicketPage()), (route) => false);
       } else {
-        print("❌ GAGAL! SERVER MERESPON: ${response.statusCode}");
-        setState(() => isLoading = false);
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(data['message'] ?? 'Gagal checkout')));
       }
     } catch (e) {
-      print("🚨 KONEKSI ERROR (MUNGKIN SALAH IP): $e");
-      print("Error fetching detail: $e");
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Error: $e")));
+    } finally {
       setState(() => isLoading = false);
     }
   }
@@ -72,102 +54,32 @@ class _TicketBeliPage extends State<TicketBeliPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF2F2F2),
-      appBar: AppBar(
-        title: const Text("Konfirmasi Pembelian"),
-        backgroundColor: const Color(0xFF17C3A5),
-        foregroundColor: Colors.white,
-        elevation: 0,
-      ),
+      appBar: AppBar(title: const Text('Checkout Tiket')),
       body: Padding(
-        padding: const EdgeInsets.all(20.0),
+        padding: const EdgeInsets.all(20),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            const Text(
-              "Detail Pesanan",
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-            ),
-            const SizedBox(height: 16),
-            Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(16),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
-                    blurRadius: 10,
-                    offset: const Offset(0, 5),
-                  ),
-                ],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    eventBeliDetail?['name'] ?? 'Nama Event',
-                    style: const TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                  const Divider(height: 30),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text("Tanggal"),
-                      Text(eventBeliDetail?['startDate'] ?? '-'),
-                    ],
-                  ),
-                  const SizedBox(height: 10),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text("Total Pembayaran"),
-                      Text(
-                        eventBeliDetail?['entranceFee'] ?? '',
-                        style: const TextStyle(
-                          color: Color(0xFF0B8B62),
-                          fontWeight: FontWeight.bold,
-                          fontSize: 16,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
+            const Text("Jumlah Tiket:", style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                IconButton(onPressed: () { if (qty > 1) setState(() => qty--); }, icon: const Icon(Icons.remove_circle, size: 30)),
+                Text('$qty', style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
+                IconButton(onPressed: () => setState(() => qty++), icon: const Icon(Icons.add_circle, size: 30, color: Color(0xFF16c4b0))),
+              ],
             ),
             const Spacer(),
-
             SizedBox(
               width: double.infinity,
               height: 50,
               child: ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => const SuccessPage(),
-                    ),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF17C3A5),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(30),
-                  ),
-                ),
-                child: const Text(
-                  "Konfirmasi Beli",
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 16,
-                  ),
-                ),
+                onPressed: isLoading ? null : checkout,
+                style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF16c4b0)),
+                child: isLoading 
+                    ? const CircularProgressIndicator(color: Colors.white) 
+                    : const Text("Lanjut ke Pembayaran", style: TextStyle(color: Colors.white, fontSize: 16)),
               ),
-            ),
+            )
           ],
         ),
       ),

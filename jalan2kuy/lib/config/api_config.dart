@@ -22,6 +22,10 @@ class ApiConfig {
   static const String eventBeliTiket = '$_baseUrl/api/event/checkout';
   static const String MyTicket = '$_baseUrl/api/MyTicket';
 
+  static const String paymentContinue = '$_baseUrl/api/payment/continue';
+  static const String paymentCancel = '$_baseUrl/api/payment/cancel';
+  static const String scanTicket = '$_baseUrl/api/ticket/scan';
+
   // Anda bisa menambahkan endpoint lain di sini nanti, misal:
   // static const String register = '$_baseUrl/api/register';
   // static const String destinations = '$_baseUrl/api/destinations';
